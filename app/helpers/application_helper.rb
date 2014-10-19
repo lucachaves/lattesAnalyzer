@@ -5,13 +5,21 @@ require 'json'
 
 module ApplicationHelper
 
-	def extract(xpath)
-		value = $xmldoc.xpath(xpath)
-		if value.length < 1
-			""
-		else
+	def extract(node, xpath, kind=1)
+		value = node.at_xpath(xpath)
+		if kind == 1
+			if value != nil
+				value.value
+			else
+				value
+			end
+		elsif kind == 2
+			value
+		elsif kind == 3
 			value[0].value
 		end
+		# puts ">>>>#{value}"
+		# value
 	end
 
 	def extractInfo(file)
@@ -28,12 +36,10 @@ module ApplicationHelper
 		end	
 
 		# Atualização
-		research[:updated] = $xmldoc.xpath("//CURRICULO-VITAE/@DATA-ATUALIZACAO")[0].value
+		research[:lattes_updated_at] = $xmldoc.xpath("//CURRICULO-VITAE/@DATA-ATUALIZACAO")[0].value
 
 		# NOME
 		research[:name] = $xmldoc.xpath("//DADOS-GERAIS/@NOME-COMPLETO")[0].value
-		Person.create :name => research[:name]
-		person = Person.last
 
 		# Nascimento
 		research[:birth] = {}	
@@ -46,22 +52,23 @@ module ApplicationHelper
 
 		# Área de atuação
 		research[:knowledge] = []
-		formation = $xmldoc.xpath("//AREA-DE-ATUACAO")
-		formation.each{|f|
+		knowledges = $xmldoc.xpath("//AREA-DE-ATUACAO")
+		knowledges.each{|f|
 			knowledge = {}
-			knowledge[:"NOME-GRANDE-AREA-DO-CONHECIMENTO"] = f.xpath("//@NOME-GRANDE-AREA-DO-CONHECIMENTO")[0].value
-			knowledge[:"NOME-DA-AREA-DO-CONHECIMENTO"] = f.xpath("//@NOME-DA-AREA-DO-CONHECIMENTO")[0].value
-			knowledge[:"NOME-DA-SUB-AREA-DO-CONHECIMENTO"] = f.xpath("//@NOME-DA-SUB-AREA-DO-CONHECIMENTO")[0].value
-			knowledge[:"NOME-DA-ESPECIALIDADE"] = f.xpath("//@NOME-DA-ESPECIALIDADE")[0].value
+			knowledge[:major_subject] = extract(f, "@NOME-GRANDE-AREA-DO-CONHECIMENTO")
+			knowledge[:subject] = extract(f, "@NOME-DA-AREA-DO-CONHECIMENTO")
+			knowledge[:subsection] = extract(f, "@NOME-DA-SUB-AREA-DO-CONHECIMENTO")
+			knowledge[:specialty] = extract(f, "@NOME-DA-ESPECIALIDADE")
 			research[:knowledge] << knowledge
 		}
-		# PROFISSÃO
+
+		# WORK
 		# course ??? orientação?
 		city = $xmldoc.xpath("//ENDERECO-PROFISSIONAL/@CIDADE")[0].value
 		uf = $xmldoc.xpath("//ENDERECO-PROFISSIONAL/@UF")[0].value
 		country = $xmldoc.xpath("//ENDERECO-PROFISSIONAL/@PAIS")[0].value
 		university = $xmldoc.xpath("//ENDERECO-PROFISSIONAL/@NOME-INSTITUICAO-EMPRESA")[0].value
-		orgao = $xmldoc.xpath("//ENDERECO-PROFISSIONAL/@NOME-ORGAO")[0].value
+		organ = $xmldoc.xpath("//ENDERECO-PROFISSIONAL/@NOME-ORGAO")[0].value
 		research[:work] = {
 			location: {
 				city: city,
@@ -69,43 +76,70 @@ module ApplicationHelper
 				country: country
 			},
 			university: university,
-			orgao: orgao
+			organ: organ
 		}
 
-		# FORMAÇÃO
+		# DEGREE
 		# city, uf ???
-		research[:formation] = []
-		formation = $xmldoc.xpath("//FORMACAO-ACADEMICA-TITULACAO").children
-		formation.each{|f|
-			university = extract("//FORMACAO-ACADEMICA-TITULACAO/#{f.name}/@NOME-INSTITUICAO")
-			universityCode = extract("//FORMACAO-ACADEMICA-TITULACAO/#{f.name}/@CODIGO-INSTITUICAO")
-			country = extract("//INFORMACAO-ADICIONAL-INSTITUICAO[@CODIGO-INSTITUICAO='#{universityCode}']/@NOME-PAIS-INSTITUICAO")
-			university_abbr = extract("//INFORMACAO-ADICIONAL-INSTITUICAO[@CODIGO-INSTITUICAO='#{universityCode}']/@SIGLA-INSTITUICAO")
-			uf_abbr = extract("//INFORMACAO-ADICIONAL-INSTITUICAO[@CODIGO-INSTITUICAO='#{universityCode}']/@SIGLA-UF-INSTITUICAO")
-			country_abbr = extract("//INFORMACAO-ADICIONAL-INSTITUICAO[@CODIGO-INSTITUICAO='#{universityCode}']/@SIGLA-PAIS-INSTITUICAO")
-			course = extract("//FORMACAO-ACADEMICA-TITULACAO/#{f.name}/@NOME-CURSO")
-			year = extract("//FORMACAO-ACADEMICA-TITULACAO/#{f.name}/@ANO-DE-CONCLUSAO")
-			title = extract("//FORMACAO-ACADEMICA-TITULACAO/#{f.name}/@TITULO-DA-DISSERTACAO-TESE")
-			
-		# 	puts f.name
-		# 	puts "#"
-		# 	puts course
-		# 	puts university
-		# 	puts country
-		# 	puts year
-		# 	puts title
-			research[:formation] << {
-				formation: f.name.to_sym,
+		research[:degree] = []
+		degree = $xmldoc.xpath("//FORMACAO-ACADEMICA-TITULACAO").children
+		degree.each{|d|
+			universityCode = extract(d, "@CODIGO-INSTITUICAO", 2)
+			research[:degree] << {
+				formation: d.name,
 				location: {
-					country: country,
-					country_abbr: country_abbr,
-					uf_abbr: uf_abbr
+					uf_abbr: extract(d, "//INFORMACAO-ADICIONAL-INSTITUICAO[@CODIGO-INSTITUICAO='#{universityCode}']/@SIGLA-UF-INSTITUICAO"),
+					country: extract(d, "//INFORMACAO-ADICIONAL-INSTITUICAO[@CODIGO-INSTITUICAO='#{universityCode}']/@NOME-PAIS-INSTITUICAO"),
+					country_abbr: extract(d, "//INFORMACAO-ADICIONAL-INSTITUICAO[@CODIGO-INSTITUICAO='#{universityCode}']/@SIGLA-PAIS-INSTITUICAO")
 				},
+				university: extract(d, "@NOME-INSTITUICAO"),
+				university_abbr: extract(d, "//INFORMACAO-ADICIONAL-INSTITUICAO[@CODIGO-INSTITUICAO='#{universityCode}']/@SIGLA-INSTITUICAO"),
+				course: extract(d, "@NOME-CURSO"),
+				title: extract(d, "@TITULO-DA-DISSERTACAO-TESE"),
+				year: extract(d, "@ANO-DE-CONCLUSAO", 2)
+			}
+		}
+
+		#ORIENTAÇÕES
+		research[:orientation] = []
+		orientation = $xmldoc.xpath("//ORIENTACOES-CONCLUIDAS").children
+		# # orientation << $xmldoc.xpath("//DADOS-COMPLEMENTARES/ORIENTACOES-EM-ANDAMENTO").children
+		orientation.each{|f|
+			name = f.name.split("-").last
+			university_code = extract(f, "DETALHAMENTO-DE-ORIENTACOES-CONCLUIDAS-PARA-#{name}/@CODIGO-INSTITUICAO", 2)
+			university = {
+				name: extract(f, "DETALHAMENTO-DE-ORIENTACOES-CONCLUIDAS-PARA-#{name}/@NOME-DA-INSTITUICAO"),
+				abbr: extract(f, "//INFORMACAO-ADICIONAL-INSTITUICAO[@CODIGO-INSTITUICAO='#{university_code}']/@SIGLA-INSTITUICAO"),
+				location: {
+					country: extract(f, "//INFORMACAO-ADICIONAL-INSTITUICAO[@CODIGO-INSTITUICAO='#{university_code}']/@NOME-PAIS-INSTITUICAO"),
+					uf_country: extract(f, "//INFORMACAO-ADICIONAL-INSTITUICAO[@CODIGO-INSTITUICAO='#{university_code}']/@SIGLA-PAIS-INSTITUICAO"),
+					uf_abbr: extract(f, "//INFORMACAO-ADICIONAL-INSTITUICAO[@CODIGO-INSTITUICAO='#{university_code}']/@SIGLA-UF-INSTITUICAO")
+				}
+			}
+			course_code = extract(f, "DETALHAMENTO-DE-ORIENTACOES-CONCLUIDAS-PARA-#{name}/@CODIGO-CURSO", 2)
+			knowledge = {
+				major_subject: extract(f, "//INFORMACAO-ADICIONAL-CURSO[@CODIGO-CURSO='#{course_code}']/@NOME-GRANDE-AREA-DO-CONHECIMENTO"),
+				subject: extract(f, "//INFORMACAO-ADICIONAL-CURSO[@CODIGO-CURSO='#{course_code}']/@NOME-DA-AREA-DO-CONHECIMENTO"),
+				subsection: extract(f, "//INFORMACAO-ADICIONAL-CURSO[@CODIGO-CURSO='#{course_code}']/@NOME-DA-SUB-AREA-DO-CONHECIMENTO"),
+				specialty: extract(f, "//INFORMACAO-ADICIONAL-CURSO[@CODIGO-CURSO='#{course_code}']/@NOME-DA-ESPECIALIDADE")
+			}
+			course = {
+				name: extract(f, "DETALHAMENTO-DE-ORIENTACOES-CONCLUIDAS-PARA-#{name}/@NOME-DO-CURSO"),
+				knowledge: knowledge
+			}
+			research[:orientation] << {
+				student: extract(f, "DETALHAMENTO-DE-ORIENTACOES-CONCLUIDAS-PARA-#{name}/@NOME-DO-ORIENTADO"),
+				document: extract(f, "DADOS-BASICOS-DE-ORIENTACOES-CONCLUIDAS-PARA-#{name}/@NATUREZA"),
+				# phd, master
+				kind: extract(f, "DADOS-BASICOS-DE-ORIENTACOES-CONCLUIDAS-PARA-#{name}/@TIPO"),
+				#degree
+				formation: extract(f, "//INFORMACAO-ADICIONAL-CURSO[@CODIGO-CURSO='#{course_code}']/@NIVEL-CURSO"),
+				title: extract(f, "DADOS-BASICOS-DE-ORIENTACOES-CONCLUIDAS-PARA-#{name}/@TITULO"),
+				year: extract(f, "DADOS-BASICOS-DE-ORIENTACOES-CONCLUIDAS-PARA-#{name}/@ANO"),
+				language: extract(f, "DADOS-BASICOS-DE-ORIENTACOES-CONCLUIDAS-PARA-#{name}/@IDIOMA"),
+				orientation: extract(f, "DETALHAMENTO-DE-ORIENTACOES-CONCLUIDAS-PARA-#{name}/@TIPO-DE-ORIENTACAO"),
 				university: university,
-				university_abbr: university_abbr,
-				course: course,
-				title: title,
-				year: year
+				course: course
 			}
 		}
 		puts JSON.pretty_generate(research)
@@ -113,25 +147,35 @@ module ApplicationHelper
 	end
 
 	def recordResearch research
-		# p = Person.create name: research[:name], id16: research[:id], updated: research[:updated]
-		p = Person.create name: research[:name], updated: research[:updated]
+		# TODO if exist, postgres
 
+		# Person
+		p = Person.create id16: research[:id], name: research[:name], lattes_updated_at: research[:lattes_updated_at]
+		# p = Person.create name: research[:name], lattes_updated_at: research[:lattes_updated_at]
+
+		# Birth
 		l = Location.create city: research[:birth][:location][:city], 
 			uf: research[:birth][:location][:uf], 
 			country: research[:birth][:location][:country]
 		p.location = l
 
-		research[:formation].each{|r|
-			l = Location.create country: r[:location][:country]
+		# Degree
+		research[:degree].each{|r|
+			l = Location.create country: r[:location][:country], 
+				country_abbr: r[:location][:country_abbr], 
+				uf_abbr: r[:location][:uf_abbr]
 
-			u = University.create name: r[:university]
+			# University
+			u = University.create name: r[:university], abbr: r[:university_abbr]
 			u.location = l
 			u.save
 
+			# Course
 			c = Course.create name: r[:course]
 			c.university = u
 			c.save
 
+			# Degree
 			d = Degree.create name: r[:formation], year: r[:year], title: r[:title]
 			d.course = c
 			d.save
@@ -139,13 +183,70 @@ module ApplicationHelper
 			p.degrees << d
 		}
 
+		# Knowledge
+		research[:knowledge].each{|r|	
+			k = Knowledge.create major_subject: r[:major_subject],
+					major_subject: r[:major_subject],
+					subject: r[:subject],
+					subsection: r[:subsection],
+					specialty: r[:specialty]
+			p.knowledges << k
+		}
+
+		# Work
+		w = Work.create organ: research[:work][:organ]
+		l = Location.create city: research[:work][:location][:city], 
+				uf: research[:work][:location][:uf], 
+				country: research[:work][:location][:country]
+		u = University.create name: research[:work][:university]
+		u.location = l
+		u.save
+		w.university = u
+		w.save
+		p.work = w
+
+		# Orientation
+		research[:orientation].each{|o|
+			orientation = Orientation.create document: o[:document],
+				kind: o[:kind],
+				title: o[:title],
+				year: o[:year],
+				language: o[:language],
+				orientation: o[:orientation],
+				student: o[:student],
+				formation: o[:formation]
+		
+			l = Location.create uf_abbr: o[:university][:location][:uf_abbr], 
+				country_abbr: o[:university][:location][:uf_country], 
+				country: o[:university][:location][:country]
+			u = University.create name: o[:university][:name]#, 
+				# abbr: o[:university][:abbr]
+			u.location = l
+			u.save
+		
+			c = Course.create name: o[:course][:name]
+			c.university = u
+			c.save
+			orientation.course = c
+			
+			k = Knowledge.create major_subject: o[:course][:knowledge][:major_subject],
+					major_subject: o[:course][:knowledge][:major_subject],
+					subject: o[:course][:knowledge][:subject],
+					subsection: o[:course][:knowledge][:subsection],
+					specialty: o[:course][:knowledge][:specialty]
+			orientation.knowledge = k
+			orientation.save
+
+			p.orientations << orientation
+		}
 		p.save
 	end
 
 	def process
+		# TODO load postgres
 		files = `ls app/helpers/lattes`.split "\n"
 		# lattesPool = Thread.pool(1)
-		# files[0..900].each{|f|
+		# files[0..100].each{|f|
 		files.each{|f|
 			# lattesPool.process do
 				next unless f.include? ".xml"

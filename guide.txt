@@ -1,0 +1,119 @@
+xmldoc = Nokogiri::XML(File.read('app/helpers/lattes/0005349558315095.xml'))
+xmldoc.xpath("//FORMACAO-ACADEMICA-TITULACAO").children
+
+rails generate model location city:string uf:string uf_abbr:string country:string country_abbr:string
+rails generate model university name:string abbr:string location:references
+rails generate model course name:string university:references
+rails generate model degree name:string title:string year:integer course:references person:references
+rails generate model person id16:primary_key name:string lattes_updated_at:date location:references knowlegde:references --no-id
+rails generate model work organ:string person:references university:references
+rails generate model knowledge major_subject:string subject:string subsection:string specialty:string person:references
+rails generate model orientation document:string title:string kind:string formation:string year:string language:string orientation:string student:string course:references knowledge:references person:references
+rails generate migration CreateJoinTableStudentTeacher knowledge person
+
+rake db:drop
+rails destroy model location
+rails destroy model university
+rails destroy model degree
+rails destroy model person
+rails destroy model course
+rails destroy model work
+rails destroy model knowledge
+rails destroy model orientation
+rails destroy migration CreateJoinTableStudentTeacher
+
+rake db:reset
+
+l = Location.create city: 'jp', uf: 'pb', country: 'pb'
+l.universities.create :name => 'UFPB'
+l.universities.last.course.create :name => 'PPGI'
+l.universities.last.course.last.degree.create :name => 'DOUTORADO'
+p = Person.create :name => 'luiz'
+l.universities.last.course.last.degree.last.person = p
+
+p = Person.create :name => 'luiz'
+
+l = Location.create city: 'jp', uf: 'pb', country: 'pb'
+
+u = University.create :name => 'UFPB'
+u.location = l
+u.save
+
+c = Course.create :name => 'PPGI'
+c.university = u
+c.save
+
+d1 = Degree.create :name => 'DOUTORADO'
+d1.course = c
+d1.save
+
+d2 = Degree.create :name => 'MESTRADO'
+d2.course = c
+d2.save
+
+p.degrees << d1
+p.degrees << d2
+
+p.location = l
+
+p.save
+
+p.degrees.each{|d| puts d.course.university.name}
+p.degrees.each{|d| puts d.course.university.location.country}
+Degree.all.each{|d| puts d.course.university.name}
+Degree.all.each{|d| puts ">>> #{d.name} #{d.course.name} #{d.course.university.name} #{d.course.university.location.country}"}
+Location.all.each{|l| puts " #{l.city} #{l.uf} #{l.country}" }
+
+job has_many comments ()
+rails generate model job title:string description:text
+rails generate model comment name:string body:text job:references
+rake db:migrate
+job = Job.new
+job.title = "Novo job!"
+job.save
+job.comments.create(name: "Fulano", body: "Outro comentário")
+job.comments.size
+
+rails destroy model job
+rails destroy model comment
+
+
+
+
+
+ORIENTACOES
+//ORIENTACOES-CONCLUIDAS/ORIENTACOES-CONCLUIDAS-PARA-MESTRADO
+DADOS-BASICOS-DE-ORIENTACOES-CONCLUIDAS-PARA-MESTRADO
+	@NATUREZA
+	@TIPO
+	@TITULO
+	@ANO
+	@IDIOMA
+
+	DETALHAMENTO-DE-ORIENTACOES-CONCLUIDAS-PARA-MESTRADO
+		@TIPO-DE-ORIENTACAO
+		@NOME-DA-INSTITUICAO
+		@CODIGO-INSTITUICAO
+		//INFORMACAO-ADICIONAL-INSTITUICAO[@CODIGO-INSTITUICAO='#{codigo}']/@NOME-PAIS-INSTITUICAO
+		//INFORMACAO-ADICIONAL-INSTITUICAO[@CODIGO-INSTITUICAO='#{codigo}']/@SIGLA-INSTITUICAO
+		//INFORMACAO-ADICIONAL-INSTITUICAO[@CODIGO-INSTITUICAO='#{codigo}']/@SIGLA-UF-INSTITUICAO
+		//INFORMACAO-ADICIONAL-INSTITUICAO[@CODIGO-INSTITUICAO='#{codigo}']/@SIGLA-PAIS-INSTITUICAO
+	
+		@NOME-DO-CURSO
+		@CODIGO-CURSO
+		//INFORMACAO-ADICIONAL-CURSO[@CODIGO-CURSO='#{codigo}']/@NOME-GRANDE-AREA-DO-CONHECIMENTO
+		//INFORMACAO-ADICIONAL-CURSO[@CODIGO-CURSO='#{codigo}']/@NOME-DA-AREA-DO-CONHECIMENTO
+		//INFORMACAO-ADICIONAL-CURSO[@CODIGO-CURSO='#{codigo}']/@NOME-DA-SUB-AREA-DO-CONHECIMENTO
+		//INFORMACAO-ADICIONAL-CURSO[@CODIGO-CURSO='#{codigo}']/@NOME-DA-ESPECIALIDADE
+		//INFORMACAO-ADICIONAL-CURSO[@CODIGO-CURSO='#{codigo}']/@NIVEL-CURSO
+
+PALAVRAS-CHAVE
+SETORES-DE-ATIVIDADE
+AREAS-DO-CONHECIMENTO
+
+//DADOS-COMPLEMENTARES/ORIENTACOES-EM-ANDAMENTO/ORIENTACAO-EM-ANDAMENTO-DE-DOUTORADO
+@NATUREZA
+@TIPO
+@TITULO
+@ANO
+@IDIOMA

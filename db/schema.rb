@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20141016090936) do
+ActiveRecord::Schema.define(version: 20141019025838) do
 
   create_table "courses", force: true do |t|
     t.string   "name"
@@ -35,22 +35,63 @@ ActiveRecord::Schema.define(version: 20141016090936) do
   add_index "degrees", ["course_id"], name: "index_degrees_on_course_id"
   add_index "degrees", ["person_id"], name: "index_degrees_on_person_id"
 
+  create_table "knowledges", force: true do |t|
+    t.string   "major_subject"
+    t.string   "subject"
+    t.string   "subsection"
+    t.string   "specialty"
+    t.integer  "person_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "knowledges", ["person_id"], name: "index_knowledges_on_person_id"
+
+  create_table "knowledges_people", id: false, force: true do |t|
+    t.integer "knowledge_id", null: false
+    t.integer "person_id",    null: false
+  end
+
   create_table "locations", force: true do |t|
     t.string   "city"
     t.string   "uf"
+    t.string   "uf_abbr"
     t.string   "country"
+    t.string   "country_abbr"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
 
-  create_table "people", force: true do |t|
+  create_table "orientations", force: true do |t|
+    t.string   "document"
+    t.string   "title"
+    t.string   "kind"
+    t.string   "formation"
+    t.string   "year"
+    t.string   "language"
+    t.string   "orientation"
+    t.string   "student"
+    t.integer  "course_id"
+    t.integer  "knowledge_id"
+    t.integer  "person_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "orientations", ["course_id"], name: "index_orientations_on_course_id"
+  add_index "orientations", ["knowledge_id"], name: "index_orientations_on_knowledge_id"
+  add_index "orientations", ["person_id"], name: "index_orientations_on_person_id"
+
+  create_table "people", primary_key: "id16", force: true do |t|
     t.string   "name"
-    t.date     "updated"
+    t.date     "lattes_updated_at"
     t.integer  "location_id"
+    t.integer  "knowlegde_id"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
 
+  add_index "people", ["knowlegde_id"], name: "index_people_on_knowlegde_id"
   add_index "people", ["location_id"], name: "index_people_on_location_id"
 
   create_table "universities", force: true do |t|
@@ -58,8 +99,20 @@ ActiveRecord::Schema.define(version: 20141016090936) do
     t.integer  "location_id"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.string   "abbr"
   end
 
   add_index "universities", ["location_id"], name: "index_universities_on_location_id"
+
+  create_table "works", force: true do |t|
+    t.string   "organ"
+    t.integer  "person_id"
+    t.integer  "university_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "works", ["person_id"], name: "index_works_on_person_id"
+  add_index "works", ["university_id"], name: "index_works_on_university_id"
 
 end

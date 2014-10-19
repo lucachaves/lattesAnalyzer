@@ -1,0 +1,27 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  doc: MyString
+  title: MyString
+  kind: MyString
+  formation: MyString
+  year: MyString
+  language: MyString
+  orientation: MyString
+  student: MyString
+  course_id: 
+  knowledge_id: 
+  person_id: 
+
+two:
+  doc: MyString
+  title: MyString
+  kind: MyString
+  formation: MyString
+  year: MyString
+  language: MyString
+  orientation: MyString
+  student: MyString
+  course_id: 
+  knowledge_id: 
+  person_id: 

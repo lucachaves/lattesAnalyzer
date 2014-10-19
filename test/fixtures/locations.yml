@@ -3,9 +3,13 @@
 one:
   city: MyString
   uf: MyString
+  uf_abbr: MyString
   country: MyString
+  country_abbr: MyString
 
 two:
   city: MyString
   uf: MyString
+  uf_abbr: MyString
   country: MyString
+  country_abbr: MyString

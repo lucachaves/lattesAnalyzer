@@ -1,0 +1,15 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  major_subject: MyString
+  subject: MyString
+  subsection: MyString
+  specialty: MyString
+  person_id: 
+
+two:
+  major_subject: MyString
+  subject: MyString
+  subsection: MyString
+  specialty: MyString
+  person_id: 
