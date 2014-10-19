@@ -82,7 +82,8 @@ ActiveRecord::Schema.define(version: 20141019025838) do
   add_index "orientations", ["knowledge_id"], name: "index_orientations_on_knowledge_id"
   add_index "orientations", ["person_id"], name: "index_orientations_on_person_id"
 
-  create_table "people", primary_key: "id16", force: true do |t|
+  create_table "people", force: true do |t|
+    t.string   "id16"
     t.string   "name"
     t.date     "lattes_updated_at"
     t.integer  "location_id"

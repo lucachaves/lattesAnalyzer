@@ -1,7 +1,7 @@
 class CreateOrientations < ActiveRecord::Migration
   def change
     create_table :orientations do |t|
-      t.string :doc
+      t.string :document
       t.string :title
       t.string :kind
       t.string :formation

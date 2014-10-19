@@ -1,7 +1,7 @@
 # Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 one:
-  doc: MyString
+  document: MyString
   title: MyString
   kind: MyString
   formation: MyString
@@ -14,7 +14,7 @@ one:
   person_id: 
 
 two:
-  doc: MyString
+  document: MyString
   title: MyString
   kind: MyString
   formation: MyString

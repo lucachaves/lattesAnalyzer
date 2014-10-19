@@ -1,7 +1,3 @@
-require 'thread/pool'
-require 'nokogiri'
-require 'open-uri'
-require 'json'
 
 module ApplicationHelper
 
@@ -23,8 +19,7 @@ module ApplicationHelper
 	end
 
 	def extractInfo(file)
-		xmlfile = File.new("app/helpers/lattes/#{file}")
-		$xmldoc = Nokogiri::XML(xmlfile)
+		$xmldoc = Nokogiri::XML(file)
 
 		research = {}
 		#id
@@ -147,13 +142,13 @@ module ApplicationHelper
 	end
 
 	def recordResearch research
-		# TODO if exist, postgres
+		# TODO if exist (CHECK)
 
 		# Person
 		p = Person.create id16: research[:id], name: research[:name], lattes_updated_at: research[:lattes_updated_at]
 		# p = Person.create name: research[:name], lattes_updated_at: research[:lattes_updated_at]
 
-		# Birth
+		# Birth CHECK
 		l = Location.create city: research[:birth][:location][:city], 
 			uf: research[:birth][:location][:uf], 
 			country: research[:birth][:location][:country]
@@ -161,16 +156,17 @@ module ApplicationHelper
 
 		# Degree
 		research[:degree].each{|r|
+			# location CHECK
 			l = Location.create country: r[:location][:country], 
 				country_abbr: r[:location][:country_abbr], 
 				uf_abbr: r[:location][:uf_abbr]
 
-			# University
+			# University CHECK
 			u = University.create name: r[:university], abbr: r[:university_abbr]
 			u.location = l
 			u.save
 
-			# Course
+			# Course CHECK
 			c = Course.create name: r[:course]
 			c.university = u
 			c.save
@@ -183,7 +179,7 @@ module ApplicationHelper
 			p.degrees << d
 		}
 
-		# Knowledge
+		# Knowledge CHECK
 		research[:knowledge].each{|r|	
 			k = Knowledge.create major_subject: r[:major_subject],
 					major_subject: r[:major_subject],
@@ -195,9 +191,11 @@ module ApplicationHelper
 
 		# Work
 		w = Work.create organ: research[:work][:organ]
+		# CHECK
 		l = Location.create city: research[:work][:location][:city], 
 				uf: research[:work][:location][:uf], 
 				country: research[:work][:location][:country]
+		# CHECK
 		u = University.create name: research[:work][:university]
 		u.location = l
 		u.save
@@ -215,20 +213,23 @@ module ApplicationHelper
 				orientation: o[:orientation],
 				student: o[:student],
 				formation: o[:formation]
-		
+			# CHECK
 			l = Location.create uf_abbr: o[:university][:location][:uf_abbr], 
 				country_abbr: o[:university][:location][:uf_country], 
 				country: o[:university][:location][:country]
-			u = University.create name: o[:university][:name]#, 
-				# abbr: o[:university][:abbr]
+			# CHECK
+			u = University.create name: o[:university][:name]
+				abbr: o[:university][:abbr]
 			u.location = l
 			u.save
 		
+			# CHECK
 			c = Course.create name: o[:course][:name]
 			c.university = u
 			c.save
 			orientation.course = c
 			
+			# CHECK
 			k = Knowledge.create major_subject: o[:course][:knowledge][:major_subject],
 					major_subject: o[:course][:knowledge][:major_subject],
 					subject: o[:course][:knowledge][:subject],
@@ -242,14 +243,22 @@ module ApplicationHelper
 		p.save
 	end
 
+	def get_lattes
+		lattes = []
+		conn = PG.connect(host: '192.168.56.101', dbname: 'curriculos', user: 'postgres', password: 'postgres')
+		res = conn.exec('select * from lattes')
+		res.map{|row|
+			row['xml']
+		}
+		# `ls app/helpers/lattes`.split "\n"
+	end
+
 	def process
-		# TODO load postgres
-		files = `ls app/helpers/lattes`.split "\n"
+		files = get_lattes
 		# lattesPool = Thread.pool(1)
 		# files[0..100].each{|f|
 		files.each{|f|
 			# lattesPool.process do
-				next unless f.include? ".xml"
 				begin
 					r = extractInfo f
 					recordResearch r
