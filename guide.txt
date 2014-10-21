@@ -1,3 +1,38 @@
+SELECT 
+  locations.city, 
+  locations.uf, 
+  locations.uf_abbr, 
+  locations.country, 
+  locations.country_abbr, 
+  courses.name, 
+  universities.name, 
+  universities.abbr
+FROM 
+  public.universities, 
+  public.courses, 
+  public.locations
+WHERE 
+  universities.location_id = locations.id AND
+  courses.university_id = universities.id
+ORDER BY
+  universities.name ASC;
+
+Tempfile & Mechanize
+http://stackoverflow.com/questions/3316043/how-do-i-download-a-remote-image-from-another-site-to-a-file-column-in-ruby-on-r
+agent.get('http://example.com/foo').save_as 'a_file_name'
+
+http://www.markhneedham.com/blog/2008/10/02/ruby-unzipping-a-file-using-rubyzip/
+
+https://github.com/dannnylo/rtesseract
+https://github.com/gemhome/rmagick
+http://superuser.com/questions/361435/i-have-compiled-imagemagick-on-my-centos-and-rmagick-wont-install
+brew install imagemagick --disable-openmp
+#tesseract
+sudo PKG_CONFIG_PATH=/usr/local/Cellar/imagemagick/6.8.9-7/lib/pkgconfig gem install rmagick -V
+
+
+select pg_size_pretty(pg_database_size('dbname'));
+
 https://github.com/sparklemotion/nokogiri/wiki/Cheat-sheet
 https://gist.github.com/rstacruz/1569572
 http://blog.ubiquo.me/now-on-edge-easier-relations-in-scaffold-gene/
@@ -9,13 +44,15 @@ xmldoc.xpath("//FORMACAO-ACADEMICA-TITULACAO").children
 
 #rails generate model person id16:primary_key name:string lattes_updated_at:date location:references knowlegde:references --no-id
 
-rails generate model location city:string uf:string uf_abbr:string country:string country_abbr:string
-rails generate model university name:string abbr:string location:references
+rails generate model lattes id16:string id10:string lattes_updated_at:date xml:xml
+
+rails generate model location city:string uf:string country:string country_abbr:string
+rails generate model university name:string abbr:string organ:string location:references
 rails generate model course name:string university:references
 rails generate model degree name:string title:string year:integer course:references person:references
-rails generate model person id16:string name:string lattes_updated_at:date location:references knowlegde:references
+rails generate model person id16:string:uniq id10:string:uniq name:string lattes_updated_at:date location:references
 rails generate model work organ:string person:references university:references
-rails generate model knowledge major_subject:string subject:string subsection:string specialty:string person:references
+rails generate model knowledge major_subject:string subject:string subsection:string specialty:string
 rails generate model orientation document:string title:string kind:string formation:string year:string language:string orientation:string student:string course:references knowledge:references person:references
 rails generate migration CreateJoinTableStudentTeacher knowledge person
 

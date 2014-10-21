@@ -2,14 +2,14 @@
 
 one:
   id16: MyString
+  id10: MyString
   name: MyString
-  lattes_updated_at: 2014-10-19
+  lattes_updated_at: 2014-10-20
   location_id: 
-  knowlegde_id: 
 
 two:
   id16: MyString
+  id10: MyString
   name: MyString
-  lattes_updated_at: 2014-10-19
+  lattes_updated_at: 2014-10-20
   location_id: 
-  knowlegde_id: 

@@ -5,7 +5,6 @@ class CreateKnowledges < ActiveRecord::Migration
       t.string :subject
       t.string :subsection
       t.string :specialty
-      t.references :person, index: true
 
       t.timestamps
     end

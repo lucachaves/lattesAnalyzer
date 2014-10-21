@@ -3,6 +3,7 @@ class CreateUniversities < ActiveRecord::Migration
     create_table :universities do |t|
       t.string :name
       t.string :abbr
+      t.string :organ
       t.references :location, index: true
 
       t.timestamps

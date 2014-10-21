@@ -3,9 +3,11 @@
 one:
   name: MyString
   abbr: MyString
+  organ: MyString
   location_id: 
 
 two:
   name: MyString
   abbr: MyString
+  organ: MyString
   location_id: 
