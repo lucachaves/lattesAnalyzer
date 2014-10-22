@@ -4,12 +4,14 @@ one:
   id16: MyString
   id10: MyString
   name: MyString
-  lattes_updated_at: 2014-10-20
+  scholarship: MyString
+  lattes_updated_at: 2014-10-21
   location_id: 
 
 two:
   id16: MyString
   id10: MyString
   name: MyString
-  lattes_updated_at: 2014-10-20
+  scholarship: MyString
+  lattes_updated_at: 2014-10-21
   location_id: 

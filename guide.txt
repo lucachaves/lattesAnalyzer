@@ -44,13 +44,13 @@ xmldoc.xpath("//FORMACAO-ACADEMICA-TITULACAO").children
 
 #rails generate model person id16:primary_key name:string lattes_updated_at:date location:references knowlegde:references --no-id
 
-rails generate model lattes id16:string id10:string lattes_updated_at:date xml:xml
+rails generate model curriculum id16:string id10:string lattes_updated_at:date xml:xml
 
 rails generate model location city:string uf:string country:string country_abbr:string
 rails generate model university name:string abbr:string organ:string location:references
 rails generate model course name:string university:references
 rails generate model degree name:string title:string year:integer course:references person:references
-rails generate model person id16:string:uniq id10:string:uniq name:string lattes_updated_at:date location:references
+rails generate model person id16:string:uniq id10:string:uniq name:string scholarship:string lattes_updated_at:date location:references
 rails generate model work organ:string person:references university:references
 rails generate model knowledge major_subject:string subject:string subsection:string specialty:string
 rails generate model orientation document:string title:string kind:string formation:string year:string language:string orientation:string student:string course:references knowledge:references person:references

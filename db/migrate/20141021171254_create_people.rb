@@ -4,6 +4,7 @@ class CreatePeople < ActiveRecord::Migration
       t.string :id16
       t.string :id10
       t.string :name
+      t.string :scholarship
       t.date :lattes_updated_at
       t.references :location, index: true
 

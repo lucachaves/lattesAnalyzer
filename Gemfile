@@ -27,8 +27,8 @@ gem 'sdoc', '~> 0.4.0',          group: :doc
 # Spring speeds up development by keeping your application running in the background. Read more: https://github.com/rails/spring
 gem 'spring',        group: :development
 
-gem 'rtesseract'
 gem 'rmagick'
+gem 'rtesseract'
 gem 'zip'
 gem 'thread'
 gem 'mechanize'
@@ -46,5 +46,5 @@ gem 'json'
 # gem 'capistrano-rails', group: :development
 
 # Use debugger
-# gem 'debugger', group: [:development, :test]
+gem 'debugger', group: [:development, :test]
 
