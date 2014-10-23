@@ -1,4 +1,4 @@
-class CreateJoinTableStudentTeacher < ActiveRecord::Migration
+class CreateJoinTableKnowledgePeople < ActiveRecord::Migration
   def change
     create_join_table :knowledges, :people do |t|
       # t.index [:knowledge_id, :person_id]

@@ -42,10 +42,27 @@ create_table :problems, :id => false do |t|
 xmldoc = Nokogiri::XML(File.read('app/helpers/lattes/0005349558315095.xml'))
 xmldoc.xpath("//FORMACAO-ACADEMICA-TITULACAO").children
 
+
+
+http://www.ruby-doc.org/stdlib-1.9.3/libdoc/singleton/rdoc/Singleton.html
+
+
+SocketError
+http://stackoverflow.com/questions/12358682/rails-post-socketerror-getaddrinfo-temporary-failure-in-name-resolution-on
+
+
 #rails generate model person id16:primary_key name:string lattes_updated_at:date location:references knowlegde:references --no-id
 
-rails generate model curriculum id16:string id10:string lattes_updated_at:date xml:xml
+Multiple Database
+http://stackoverflow.com/questions/17311199/connecting-to-multiple-databases-in-ruby-on-rails
+def connection
+  ActiveRecord::Base.establish_connection("#{Rails.env}_sec".to_sym).connection
+end
+establish_connection "#{Rails.env}_sec".to_sym
+rake db:migrate:redo VERSION=version
 
+rails generate model curriculum id16:string id10:string lattes_updated_at:date scholarship:string degree:string xml:xml
+rails generate model update lattes_updated_at:date curriculum:references
 rails generate model location city:string uf:string country:string country_abbr:string
 rails generate model university name:string abbr:string organ:string location:references
 rails generate model course name:string university:references
@@ -54,10 +71,12 @@ rails generate model person id16:string:uniq id10:string:uniq name:string schola
 rails generate model work organ:string person:references university:references
 rails generate model knowledge major_subject:string subject:string subsection:string specialty:string
 rails generate model orientation document:string title:string kind:string formation:string year:string language:string orientation:string student:string course:references knowledge:references person:references
-rails generate migration CreateJoinTableStudentTeacher knowledge person
+rails generate migration CreateJoinTableKnowledgePeople knowledge person
 
 
 rake db:drop
+rails destroy model curriculum
+rails destroy model update
 rails destroy model location
 rails destroy model university
 rails destroy model degree
@@ -66,7 +85,7 @@ rails destroy model course
 rails destroy model work
 rails destroy model knowledge
 rails destroy model orientation
-rails destroy migration CreateJoinTableStudentTeacher
+rails destroy migration CreateJoinTableKnowledgePeople
 
 rake db:reset
 
@@ -124,6 +143,40 @@ rails destroy model job
 rails destroy model comment
 
 
+
+
+
+# Total 3900735 (10/2014)
+# PQ 14339 (1[ABCD], 2)
+# Outras Bolsas
+# D 201984
+# M 394958
+# E 733707
+# G 2005267
+# D+G+M+G 3335916 (Resta 564819 Técn, Granduando, EM)
+# 
+# idx_particao:0 #outros
+# idx_particao:1 #doutores
+# idx_nacionalidade:e
+# idx_nacionalidade:b
+# idx_formacao_academica:graduacao
+# idx_formacao_academica:especializacao
+# idx_formacao_academica:mestrado
+# idx_formacao_academica:doutorado
+# idx_formacao_academica:bra
+# idx_grd_area_atua:"CIENCIAS_AGRARIAS"
+# idx_modalidade_bolsa:1a 
+# idx_modalidade_bolsa:1b 
+# idx_modalidade_bolsa:1c 
+# idx_modalidade_bolsa:1d 
+# idx_modalidade_bolsa:2
+# idx_modalidade_bolsa:(pq) #produtividade
+# idx_modalidade_bolsa:gm # mestrado
+
+# todos
+# url = "http://buscatextual.cnpq.br/buscatextual/busca.do?metodo=forwardPaginaResultados&registros=0;100&query=( +idx_nacionalidade:e) or ( +idx_nacionalidade:b)&analise=cv"
+# pq
+# url = "http://buscatextual.cnpq.br/buscatextual/busca.do?metodo=forwardPaginaResultados&registros=0;10&query=( +( idx_modalidade_bolsa:1a idx_modalidade_bolsa:1b idx_modalidade_bolsa:1c idx_modalidade_bolsa:1d idx_modalidade_bolsa:2) +idx_modalidade_bolsa:(pq)  +idx_nacionalidade:e) or ( +( idx_modalidade_bolsa:1a idx_modalidade_bolsa:1b idx_modalidade_bolsa:1c idx_modalidade_bolsa:1d idx_modalidade_bolsa:2) +idx_modalidade_bolsa:(pq)  +idx_nacionalidade:b)&analise=cv"
 
 
 

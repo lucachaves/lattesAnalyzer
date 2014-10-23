@@ -4,6 +4,37 @@ require 'debugger'
 
 module ApplicationHelper
 
+	class CaptchaError < StandardError  
+	end 
+	
+	class DownloadZipError < StandardError  
+	end 
+
+	class Crawler
+		include Singleton
+		
+		def initialize
+			@agent = Mechanize.new
+			@retry_attempts = 5
+		end
+
+		def get(url)
+			flag = 0
+			begin
+				@page = @agent.get url
+			rescue SocketError => error
+			  if flag < @retry_attempts
+			    flag += 1
+			    sleep flag*2 
+			    retry
+			  end
+			  raise
+			end
+			@page
+		end
+
+	end
+
 	def extract_node_data(node, xpath, kind=1)
 		value =	node.at_xpath(xpath)
 		# puts ">>>>#{value}"
@@ -19,7 +50,6 @@ module ApplicationHelper
 		elsif kind == 4
 			value[0]
 		end
-		# value
 	end
 
 	def extract_xml_data(record)
@@ -146,7 +176,6 @@ module ApplicationHelper
 
 	def record_research_data research
 		# Person
-		# debugger
 		p = Person.find_or_create_by id16: research[:id16], 
 			id10: research[:id10], 
 			name: research[:name], 
@@ -175,7 +204,6 @@ module ApplicationHelper
 				location: l
 			c = Course.find_or_create_by name: degree[:course], 
 				university: u
-			# debugger
 			p.degrees << Degree.find_or_create_by(
 				name: degree[:formation], 
 				year: degree[:year], 
@@ -227,120 +255,106 @@ module ApplicationHelper
 				knowledge: k
 			)
 		}
-		# debugger
 		p.save
 	end
 
 	def extract_location_data
-		records = import_lattes_db
-		# lattesPool = Thread.pool(1)
-		# records[0..0].each{|record|
-		records.each{|record|
-			# lattesPool.process do
-				next unless Person.find_by(id16: record['id16']) == nil
-				begin
-					data = extract_xml_data record
-					print " x "
-					record_research_data data if data != nil
-					print " d "
-					# TODO % execution
-				rescue
-					puts $!, $@
-				end
-			# end
+		records = Curriculum.all
+		size = records.length
+		lattesPool = Thread.pool(50)
+		
+		records.each_with_index{|record, index|
+			next unless Person.find_by(id16: record['id16']) == nil
+			lattesPool.process do
+				data = extract_xml_data record
+				print " x "
+				record_research_data data if data != nil
+				print " d "
+			end
+			percentege = ((index+1)/size.to_f*100).round 2
+			print "\n#D #{(index+1)}/#{size}: #{percentege}% "
 		}
-		# lattesPool.shutdown
-		">>> stop extract location"
+		lattesPool.shutdown
+		""
 	end
 
 	alias_method :extract, :extract_location_data
 
-	def import_lattes_db 
-		lattes = []
-		@conn = PG.connect(host: '192.168.56.101', dbname: 'curriculos', user: 'postgres', password: 'postgres')
-		@conn.prepare('statement0', 'select * from curriculums')
-		res = @conn.exec_prepared('statement0', [])
-		res.map{|row|
-			row
+	def load_lattes_dump(page_size=nil, size=nil)
+		# TODO Filtro ???
+
+		# doutores
+		url = "http://buscatextual.cnpq.br/buscatextual/busca.do?metodo=forwardPaginaResultados&registros=10;10&query=%28+%2Bidx_particao%3A1+%2Bidx_nacionalidade%3Ae%29+or+%28+%2Bidx_particao%3A1+%2Bidx_nacionalidade%3Ab%29&analise=cv&tipoOrdenacao=null&paginaOrigem=index.do&mostrarScore=false&mostrarBandeira=false&modoIndAdhoc=null"
+
+		page = Crawler.instance.get url
+
+		page_size ||= 100
+		total = page.at('div.tit_form b').text
+		size ||= (total.to_i/page_size)
+		pages = (0..size)
+
+		lattesPool = Thread.pool(50)
+		pages.each_with_index{|page, index|
+			lattesPool.process do
+				page = Crawler.instance.get "http://buscatextual.cnpq.br/buscatextual/busca.do?metodo=forwardPaginaResultados&registros=#{page*page_size};#{page_size}&query=%28+%2Bidx_particao%3A1+%2Bidx_nacionalidade%3Ae%29+or+%28+%2Bidx_particao%3A1+%2Bidx_nacionalidade%3Ab%29&analise=cv&tipoOrdenacao=null&paginaOrigem=index.do&mostrarScore=false&mostrarBandeira=false&modoIndAdhoc=null"
+				page.search('.resultado b a').each{|research|
+					id10 = research['href'].split("'")[1]
+					Curriculum.find_or_create_by(id10: id10)
+				}
+				percentege = ((index+1)/size.to_f*100).round 2
+				print "\n#P #{(index+1)}/#{size}: #{percentege}% "
+			end
 		}
+		lattesPool.shutdown
 	end
 
-	def get_lattes_db id
-		@conn = PG.connect(host: '192.168.56.101', dbname: 'curriculos', user: 'postgres', password: 'postgres')
-		@conn.prepare('statement1', 'select * from curriculums where curriculums.id10 = $1')
-		res = @conn.exec_prepared('statement1', [id])
-		res.map{|row|
-			row
-		}
-	end
+	alias_method :load, :load_lattes_dump
 
-	def create_lattes_db
-		# Total 3900735 (10/2014)
-		# PQ 14339 (1[ABCD], 2)
-		# Outras Bolsas
-		# D 201984
-		# M 394958
-		# E 733707
-		# G 2005267
-		# D+G+M+G 3335916 (Resta 564819 Técn, Granduando, EM)
+	def scrapy(load=false)
+		if load
+			load_lattes_dump
+			print " d "
+		end
 
-		@conn = PG.connect(host: '192.168.56.101', dbname: 'curriculos', user: 'postgres', password: 'postgres')
-		
-		agent = Mechanize.new
-		url = "http://buscatextual.cnpq.br/buscatextual/busca.do?metodo=forwardPaginaResultados&registros=0;100&query=( +idx_nacionalidade:e) or ( +idx_nacionalidade:b)&analise=cv"
-		page  = agent.get url
-
-		totol = page.at('div.tit_form b').text
-		# TODO pagging & concurrent
-
-		# TODO if not exist
-		@conn.prepare('statement2', 'INSERT INTO curriculums (id10, degree) SELECT $1, $2 WHERE NOT EXISTS (SELECT id10 FROM curriculums WHERE id10 = $1)')
-
-		page.search('.resultado b a').each{|research|
-			id10 = research['href'].split("'")[1]
-			@conn.exec_prepared('statement2', [id10, ''])
-			# TODO % execution
-		}
-
-	end
-
-	def scrapy
-		@conn = PG.connect(host: '192.168.56.101', dbname: 'curriculos', user: 'postgres', password: 'postgres')
-		
-		create_lattes_db
-		print " d "
-
-		lattes_infos = import_lattes_db
+		lattes_infos = Curriculum.all
 		print " i "
 
-		# lattesPool = Thread.pool(10)
-		@conn.prepare('statement3', 'UPDATE curriculums SET id16=$1, lattes_updated_at=$3, scholarship=$4, xml=$5 WHERE id10 = $2')
-		lattes_infos.each{|info|
+		size  = lattes_infos.length
+
+		lattesPool = Thread.pool(50)
+		lattes_infos.each_with_index{|info, index|
 			next unless info['xml'] == nil 
-			# lattesPool.process do
+
+			lattesPool.process do
 				data = get_html_data_lattes(info['id10'])
-				print " h "
+				print "\n h "
 
 				date = Date.strptime(data['lattes_updated_at'].to_s,"%d/%m/%Y")
 				lattes_updated_at = date.strftime("%Y-%m-%d")
 
 				xml = get_xml_lattes(data['id16'])
 				print " x "
-			# id16, id10, lattes_updated_at, scholarship, degree (G, E, M, D, P)
-			# 1982919735990024,K4778631T5,2014-09-20,-,D 
-				@conn.exec_prepared('statement3', [data['id16'], info['id10'], lattes_updated_at, data['scholarship'], xml])
+
+				curriculum = Curriculum.find_by(id10: info['id10'])
+				curriculum.id16 = data['id16']
+				curriculum.scholarship = data['scholarship']
+				curriculum.lattes_updated_at = lattes_updated_at
+				curriculum.xml = xml
+				curriculum.updates << Update.create(lattes_updated_at: lattes_updated_at)
+				curriculum.save
+
 				print " . "
-				# TODO % execution
-			# end
+
+				percentege = ((index+1)/size.to_f*100).round 2
+				print "\n#X #{(index+1)}/#{size}: #{percentege}% "
+			end
 		}
-		# lattesPool.shutdown
+		lattesPool.shutdown
+		""
 	end
 	
 	def get_html_data_lattes(id)
-		agent = Mechanize.new
-		# url = "http://lattes.cnpq.br/#{id}"
-		url = "http://buscatextual.cnpq.br/buscatextual/visualizacv.do?id=#{id}"
-		page  = agent.get url
+		page = Crawler.instance.get  "http://buscatextual.cnpq.br/buscatextual/visualizacv.do?id=#{id}"
 		info = {}
   	# info['id10'] = page.at('div.main-content img.foto')['src'].split('id=').last
   	info['id16'] = page.at('.infpessoa .informacoes-autor li').text.split('cnpq.br/').last
@@ -351,42 +365,44 @@ module ApplicationHelper
 	end
 
 	def get_xml_lattes(id)
-		# TODO try reopen url		
 		xml = ""
-		(0..10).to_a.each{
-			agent = Mechanize.new
-			url = "http://buscatextual.cnpq.br/buscatextual/sevletcaptcha?idcnpq=#{id}"
-			page  = agent.get url
+		result = ""
+
+		begin
 			tempfile = Tempfile.new("#{id}-img")
+			page = Crawler.instance.get "http://buscatextual.cnpq.br/buscatextual/sevletcaptcha?idcnpq=#{id}"
 	    File.open(tempfile.path, 'wb') do |f|
 	      f.write page.body
 	    end
-			result = check_captcha tempfile
+	    image = RTesseract.new(tempfile)
+			result = image.to_s.strip
 			tempfile.unlink
 	    tempfile.close
+
+			raise CaptchaError unless result != "" && result =~ /^[A-Z0-9]*$/
 			
-			url = "http://buscatextual.cnpq.br/buscatextual/download.do?metodo=enviar&idcnpq=#{id}&palavra=#{result}"
-			page = agent.get url
+			page = Crawler.instance.get "http://buscatextual.cnpq.br/buscatextual/download.do?metodo=enviar&idcnpq=#{id}&palavra=#{result}"
 			tempfile = Tempfile.new("#{id}-zip")
 	    File.open(tempfile.path, 'wb') do |f|
 	      f.write page.body
 	    end
-			next if File.read(tempfile).include? "DOCTYPE"
+			has_doctype = File.read(tempfile).include? "DOCTYPE"
+			
+			raise DownloadZipError if has_doctype
+			
 			xml = unzip_file(tempfile, id)
 			tempfile.unlink
 			tempfile.close
-			return xml
-		}
-	end
 
-	def check_captcha(file)
-		result = ''
-		(0..10).to_a.each{
-			image = RTesseract.new(file)
-			result = image.to_s.strip
-			break if result != "" && result =~ /^[A-Z0-9]*$/
-		}
-		result
+
+		rescue CaptchaError => er
+			#TODO limit retry
+			retry
+		rescue DownloadZipError => er
+			retry
+		end
+		
+		xml
 	end
 
 	def unzip_file(file, id)

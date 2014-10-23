@@ -1,0 +1,9 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  lattes_updated_at: 2014-10-22
+  curriculum_id: 
+
+two:
+  lattes_updated_at: 2014-10-22
+  curriculum_id: 
