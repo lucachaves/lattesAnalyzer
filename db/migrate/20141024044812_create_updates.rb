@@ -6,5 +6,6 @@ class CreateUpdates < ActiveRecord::Migration
 
       t.timestamps
     end
+    add_index :updates, :lattes_updated_at, unique: true
   end
 end

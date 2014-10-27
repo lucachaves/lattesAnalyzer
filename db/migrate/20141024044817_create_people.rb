@@ -10,7 +10,6 @@ class CreatePeople < ActiveRecord::Migration
 
       t.timestamps
     end
-    add_index :people, :id16, unique: true
     add_index :people, :id10, unique: true
   end
 end

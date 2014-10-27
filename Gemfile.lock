@@ -58,6 +58,7 @@ GEM
       railties (>= 3.0, < 5.0)
       thor (>= 0.14, < 2.0)
     json (1.8.1)
+    log4r (1.1.10)
     mail (2.5.4)
       mime-types (~> 1.16)
       treetop (~> 1.4.8)
@@ -152,6 +153,7 @@ DEPENDENCIES
   jbuilder (~> 2.0)
   jquery-rails
   json
+  log4r
   mechanize
   nokogiri
   pg

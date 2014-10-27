@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20141023020111) do
+ActiveRecord::Schema.define(version: 20141024044822) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -35,6 +35,8 @@ ActiveRecord::Schema.define(version: 20141023020111) do
     t.datetime "created_at"
     t.datetime "updated_at"
   end
+
+  add_index "curriculums", ["id10"], name: "index_curriculums_on_id10", unique: true, using: :btree
 
   create_table "degrees", force: true do |t|
     t.string   "name"
@@ -104,7 +106,6 @@ ActiveRecord::Schema.define(version: 20141023020111) do
   end
 
   add_index "people", ["id10"], name: "index_people_on_id10", unique: true, using: :btree
-  add_index "people", ["id16"], name: "index_people_on_id16", unique: true, using: :btree
   add_index "people", ["location_id"], name: "index_people_on_location_id", using: :btree
 
   create_table "universities", force: true do |t|
@@ -126,6 +127,7 @@ ActiveRecord::Schema.define(version: 20141023020111) do
   end
 
   add_index "updates", ["curriculum_id"], name: "index_updates_on_curriculum_id", using: :btree
+  add_index "updates", ["lattes_updated_at"], name: "index_updates_on_lattes_updated_at", unique: true, using: :btree
 
   create_table "works", force: true do |t|
     t.string   "organ"

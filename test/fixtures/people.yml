@@ -5,7 +5,7 @@ one:
   id10: MyString
   name: MyString
   scholarship: MyString
-  lattes_updated_at: 2014-10-22
+  lattes_updated_at: 2014-10-24
   location_id: 
 
 two:
@@ -13,5 +13,5 @@ two:
   id10: MyString
   name: MyString
   scholarship: MyString
-  lattes_updated_at: 2014-10-22
+  lattes_updated_at: 2014-10-24
   location_id: 

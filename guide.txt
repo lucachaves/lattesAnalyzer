@@ -31,7 +31,7 @@ brew install imagemagick --disable-openmp
 sudo PKG_CONFIG_PATH=/usr/local/Cellar/imagemagick/6.8.9-7/lib/pkgconfig gem install rmagick -V
 
 
-select pg_size_pretty(pg_database_size('dbname'));
+select pg_size_pretty(pg_database_size('lattesdata'));
 
 https://github.com/sparklemotion/nokogiri/wiki/Cheat-sheet
 https://gist.github.com/rstacruz/1569572
@@ -61,13 +61,13 @@ end
 establish_connection "#{Rails.env}_sec".to_sym
 rake db:migrate:redo VERSION=version
 
-rails generate model curriculum id16:string id10:string lattes_updated_at:date scholarship:string degree:string xml:xml
-rails generate model update lattes_updated_at:date curriculum:references
+rails generate model curriculum id16:string id10:string:uniq lattes_updated_at:date scholarship:string degree:string xml:xml
+rails generate model update lattes_updated_at:date:uniq curriculum:references
 rails generate model location city:string uf:string country:string country_abbr:string
 rails generate model university name:string abbr:string organ:string location:references
 rails generate model course name:string university:references
 rails generate model degree name:string title:string year:integer course:references person:references
-rails generate model person id16:string:uniq id10:string:uniq name:string scholarship:string lattes_updated_at:date location:references
+rails generate model person id16:string id10:string:uniq name:string scholarship:string lattes_updated_at:date location:references
 rails generate model work organ:string person:references university:references
 rails generate model knowledge major_subject:string subject:string subsection:string specialty:string
 rails generate model orientation document:string title:string kind:string formation:string year:string language:string orientation:string student:string course:references knowledge:references person:references

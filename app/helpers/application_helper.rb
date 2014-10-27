@@ -8,10 +8,16 @@ module ApplicationHelper
 	end 
 	
 	class DownloadZipError < StandardError  
+	end
+
+	class DownloadHtmlError < StandardError  
+	end 
+
+	class ScrapyError < StandardError  
 	end 
 
 	class Crawler
-		include Singleton
+		# include Singleton
 		
 		def initialize
 			@agent = Mechanize.new
@@ -21,18 +27,20 @@ module ApplicationHelper
 		def get(url)
 			flag = 0
 			begin
-				@page = @agent.get url
+				page = @agent.get url
 			rescue SocketError => error
+				Rails.logger = Logger.new("log/app-dump.log")
+				logger.warn "SocketError: #{url}"
 			  if flag < @retry_attempts
 			    flag += 1
 			    sleep flag*2 
 			    retry
 			  end
+			  puts $!, $@
 			  raise
 			end
-			@page
+			page
 		end
-
 	end
 
 	def extract_node_data(node, xpath, kind=1)
@@ -53,7 +61,12 @@ module ApplicationHelper
 	end
 
 	def extract_xml_data(record)
-		return nil if record['xml'].include? "<ERRO><MENSAGEM>Erro ao recuperar o XML</MENSAGEM></ERRO>"
+		if record['xml'].include? "<ERRO><MENSAGEM>Erro ao recuperar o XML</MENSAGEM></ERRO>"
+			Rails.logger = Logger.new("log/app-dump.log")
+			Rails.logger.info "XML #{record['id10']} com <ERRO>"
+			return nil 
+		end
+
 		xmldoc = Nokogiri::XML(record['xml'])
 		research = {}
 
@@ -259,109 +272,255 @@ module ApplicationHelper
 	end
 
 	def extract_location_data
-		records = Curriculum.all
+		start_time = Time.now
+		records = Curriculum.all.select{|c| c.id16 != nil}
 		size = records.length
-		lattesPool = Thread.pool(50)
+		lattesPool = Thread.pool(30)
+		index = 0
+		@mutex = Mutex.new
 		
-		records.each_with_index{|record, index|
+		records.each{|record|
 			next unless Person.find_by(id16: record['id16']) == nil
 			lattesPool.process do
-				data = extract_xml_data record
-				print " x "
-				record_research_data data if data != nil
-				print " d "
+				begin
+					data = extract_xml_data record
+					print " x "
+					record_research_data data if data != nil
+					print " d "
+					
+					percentege = ((index)/size.to_f*100).round 2
+					print "\n#D #{(index)}/#{size}: #{percentege}% "
+				rescue
+					Rails.logger = Logger.new("log/app-dump.log")
+					logger.error "extract location data #{record['id16']}"
+					puts $!, $@
+				end
 			end
-			percentege = ((index+1)/size.to_f*100).round 2
-			print "\n#D #{(index+1)}/#{size}: #{percentege}% "
+			@mutex.synchronize do
+				index += 1
+			end
 		}
 		lattesPool.shutdown
+
+		time_diff = Time.now - start_time
+		time_diff = Time.at(time_diff.to_i.abs).utc.strftime "%H:%M:%S"
+		Rails.logger = Logger.new("log/app-dump.log")
+		Rails.logger.info "Runtime of scrapy #{time_diff} - total #{size}"
+
 		""
 	end
 
 	alias_method :extract, :extract_location_data
 
-	def load_lattes_dump(page_size=nil, size=nil)
+	def load_lattes_dump(page_size:nil, number_page:nil)
+		Rails.logger = Logger.new("log/app-dump.log")
+		Rails.logger.info "load lattes dump"
+		start_time = Time.now
+		# logger.info "load lattes dump"
 		# TODO Filtro ???
 
 		# doutores
 		url = "http://buscatextual.cnpq.br/buscatextual/busca.do?metodo=forwardPaginaResultados&registros=10;10&query=%28+%2Bidx_particao%3A1+%2Bidx_nacionalidade%3Ae%29+or+%28+%2Bidx_particao%3A1+%2Bidx_nacionalidade%3Ab%29&analise=cv&tipoOrdenacao=null&paginaOrigem=index.do&mostrarScore=false&mostrarBandeira=false&modoIndAdhoc=null"
-
-		page = Crawler.instance.get url
-
 		page_size ||= 100
-		total = page.at('div.tit_form b').text
-		size ||= (total.to_i/page_size)
-		pages = (0..size)
 
-		lattesPool = Thread.pool(50)
-		pages.each_with_index{|page, index|
+		crawler = Crawler.new
+		page = crawler.get url
+		# debugger
+
+		# TODO fail pagging 400 http://buscatextual.cnpq.br/buscatextual/busca.do?metodo=forwardPaginaResultados&registros=300;100&query=%28+%2Bidx_particao%3A1+%2Bidx_nacionalidade%3Ae%29+or+%28+%2Bidx_particao%3A1+%2Bidx_nacionalidade%3Ab%29&analise=cv&tipoOrdenacao=null&paginaOrigem=index.do&mostrarScore=false&mostrarBandeira=true&modoIndAdhoc=null
+		# não traz 100 elementos!
+		# "null" id!
+		# <b><a href="javascript:abreDetalhe('null','</li><li><B><a href=" javascript:abredetalhe('k4212156z0','madhukar_pai',15327540)"="">Madhukar Pai</a></b> 
+		# .scan /'[A-Z\d]{10}'/
+
+		total = page.at('div.tit_form b').text
+		number_page ||= (total.to_i/page_size)
+		pages = (0..number_page)
+		ids = []
+		index = 0
+		@mutex = Mutex.new
+		
+		lattesPool = Thread.pool(30)
+		pages.each{|page|
 			lattesPool.process do
-				page = Crawler.instance.get "http://buscatextual.cnpq.br/buscatextual/busca.do?metodo=forwardPaginaResultados&registros=#{page*page_size};#{page_size}&query=%28+%2Bidx_particao%3A1+%2Bidx_nacionalidade%3Ae%29+or+%28+%2Bidx_particao%3A1+%2Bidx_nacionalidade%3Ab%29&analise=cv&tipoOrdenacao=null&paginaOrigem=index.do&mostrarScore=false&mostrarBandeira=false&modoIndAdhoc=null"
-				page.search('.resultado b a').each{|research|
-					id10 = research['href'].split("'")[1]
-					Curriculum.find_or_create_by(id10: id10)
-				}
-				percentege = ((index+1)/size.to_f*100).round 2
-				print "\n#P #{(index+1)}/#{size}: #{percentege}% "
+				url = "http://buscatextual.cnpq.br/buscatextual/busca.do?metodo=forwardPaginaResultados&registros=#{page*page_size};#{page_size}&query=%28+%2Bidx_particao%3A1+%2Bidx_nacionalidade%3Ae%29+or+%28+%2Bidx_particao%3A1+%2Bidx_nacionalidade%3Ab%29&analise=cv&tipoOrdenacao=null&paginaOrigem=index.do&mostrarScore=false&mostrarBandeira=false&modoIndAdhoc=null"
+				begin
+					page = Crawler.new.get url
+					# page.search('.resultado b a').each{|research|
+					page.body.scan(/\'[\dA-Z]{10}\'/).each{|research|
+						# id10 = research['href'].split("'")[1]
+						# if id10 == nil
+						# 	Rails.logger.error "Error load page #{page} - #{research.text}"
+						# 	print " x "
+						# else
+							# ids << id10	
+						# end
+						ids << research[1..-2]
+					}
+					@mutex.synchronize do
+						index += 1
+					end
+					percentege = ((index)/number_page.to_f*100).round 2
+					print "\n#P #{(index)}/#{number_page}: #{percentege}% "
+				rescue
+					Rails.logger = Logger.new("log/app-dump.log")
+					Rails.logger.error "Load id10 #{url}"
+					puts $!, $@
+				end
 			end
 		}
 		lattesPool.shutdown
+		
+		index = 0
+		size = ids.length
+		lattesPool = Thread.pool(30)
+		ids.each{|id10|
+			lattesPool.process do
+				begin
+					Curriculum.find_or_create_by(id10: id10)
+					@mutex.synchronize do
+						index += 1
+					end
+					percentege = ((index)/size.to_f*100).round 2
+					print "\n#D #{(index)}/#{size}: #{percentege}% "
+				rescue
+					Rails.logger = Logger.new("log/app-dump.log")
+					Rails.logger.error "Record id10 #{id10} #{$!}"
+					puts $!, $@
+				end
+			end
+		}
+		lattesPool.shutdown
+		time_diff = Time.now - start_time
+		time_diff = Time.at(time_diff.to_i.abs).utc.strftime "%H:%M:%S"
+		Rails.logger = Logger.new("log/app-dump.log")
+		Rails.logger.info "Runtime of load #{time_diff} - total #{size}"
 	end
 
 	alias_method :load, :load_lattes_dump
 
-	def scrapy(load=false)
+	def scrapy(load: false, sample: nil)
+
+		start_time = Time.now
+		# id16 or xml == nil
 		if load
 			load_lattes_dump
 			print " d "
 		end
-
-		lattes_infos = Curriculum.all
 		print " i "
 
-		size  = lattes_infos.length
+		sample ||= Curriculum.all.length
+		retry_attempts = 3
+		flag = 0
+		# begin
+			puts "\n>>>>scrapy"
 
-		lattesPool = Thread.pool(50)
-		lattes_infos.each_with_index{|info, index|
-			next unless info['xml'] == nil 
+			lattes_infos = Curriculum.limit(sample).offset(0)
+			lattes_infos = lattes_infos.select{|c| c.id16 == nil}
+			size = lattes_infos.length
+			index = 0
+			@mutex = Mutex.new
 
-			lattesPool.process do
-				data = get_html_data_lattes(info['id10'])
-				print "\n h "
+			puts "\n> size #{size}"
 
-				date = Date.strptime(data['lattes_updated_at'].to_s,"%d/%m/%Y")
-				lattes_updated_at = date.strftime("%Y-%m-%d")
+			lattesPool = Thread.pool(30)
+			lattes_infos.each{|info|	
 
-				xml = get_xml_lattes(data['id16'])
-				print " x "
+				#TODO remove
+				unless info['xml'] == nil 
+					index += 1
+					next 
+				end
 
-				curriculum = Curriculum.find_by(id10: info['id10'])
-				curriculum.id16 = data['id16']
-				curriculum.scholarship = data['scholarship']
-				curriculum.lattes_updated_at = lattes_updated_at
-				curriculum.xml = xml
-				curriculum.updates << Update.create(lattes_updated_at: lattes_updated_at)
-				curriculum.save
+				lattesPool.process do
+					begin
+						#TODO dump html
+						data = get_html_data_lattes(info['id10'])
+						print " h "
+						
+						raise ScrapyError if data == nil
+						
+						date = Date.strptime(data[:lattes_updated_at].to_s,"%d/%m/%Y")
+						lattes_updated_at = date.strftime("%Y-%m-%d")
 
-				print " . "
+						xml = get_xml_lattes(data[:id16])
+						print " x "
 
-				percentege = ((index+1)/size.to_f*100).round 2
-				print "\n#X #{(index+1)}/#{size}: #{percentege}% "
-			end
-		}
-		lattesPool.shutdown
+						curriculum = Curriculum.find_by(id10: info['id10'])
+						curriculum.id16 = data[:id16]
+						curriculum.scholarship = data[:scholarship]
+						curriculum.lattes_updated_at = lattes_updated_at
+						curriculum.xml = xml
+						curriculum.updates << Update.find_or_create_by(lattes_updated_at: lattes_updated_at)
+						# debugger
+						curriculum.save
+						print " . "
+
+						@mutex.synchronize do
+							index += 1
+						end
+						percentege = (index/(size+1).to_f*100).round 2
+						print "\n#X #{index}/#{size+1}: #{percentege}% "
+					rescue ScrapyError => er
+						Rails.logger = Logger.new("log/app-dump.log")
+						Rails.logger.error "Scrapy id10 #{info['id10']} with HTML old"
+						puts $!, $@
+					rescue
+						Rails.logger = Logger.new("log/app-dump.log")
+						Rails.logger.error "Scrapy id10 #{info['id10']}"
+						puts $!, $@
+					end
+				end
+
+			}
+			lattesPool.shutdown
+
+			# debugger
+				# lattes_infos = Curriculum.limit(sample).offset(0)
+		# 	raise ScrapyError if lattes_infos.select{|c| c.id16 == nil}.length > 0
+		# rescue ScrapyError => er
+		# 	if flag < retry_attempts
+		#     flag += 1
+		# 		# retry
+		# 	end
+		# 	print " ! "
+		# 	# puts $!, $@
+		# end
+
+		time_diff = Time.now - start_time
+		time_diff = Time.at(time_diff.to_i.abs).utc.strftime "%H:%M:%S"
+		Rails.logger = Logger.new("log/app-dump.log")
+		Rails.logger.info "Runtime of scrapy #{time_diff} - total #{size}"
+
 		""
 	end
 	
 	def get_html_data_lattes(id)
-		page = Crawler.instance.get  "http://buscatextual.cnpq.br/buscatextual/visualizacv.do?id=#{id}"
-		info = {}
-  	# info['id10'] = page.at('div.main-content img.foto')['src'].split('id=').last
-  	info['id16'] = page.at('.infpessoa .informacoes-autor li').text.split('cnpq.br/').last
-  	info['lattes_updated_at'] = page.at('div.main-content div.infpessoa ul').text[/\d{2}\/\d{2}\/\d{4}/]
-  	scholarship = page.at('div.main-content div.infpessoa h2 span')
-  	info['scholarship'] = scholarship == nil ? "" : scholarship.text 
-  	info
+		retry_attempts = 10
+		begin
+			page = Crawler.new.get  "http://buscatextual.cnpq.br/buscatextual/visualizacv.do?id=#{id}"
+			scholarship = page.at('div.main-content div.infpessoa h2 span')
+			id16 = page.at('.infpessoa .informacoes-autor li').text.split('cnpq.br/').last
+			return nil if id16[/\d{16}/] == nil
+			info = {
+		  	# id10: page.at('div.main-content img.foto')['src'].split('id=').last,
+		  	id16: id16,
+		  	lattes_updated_at: page.at('div.main-content div.infpessoa ul').text[/\d{2}\/\d{2}\/\d{4}/],
+		  	scholarship: scholarship == nil ? "" : scholarship.text
+			}
+			raise DownloadHtmlError if info[:id16] == nil
+			return info
+		rescue DownloadHtmlError
+			Rails.logger = Logger.new("log/app-dump.log")
+			Rails.logger.error "Get HTML id10 #{id}"
+			if flag < retry_attempts
+		    flag += 1
+		    sleep flag*2 
+				retry
+			end		
+			# puts $!, $@
+			print " ! "
+		end
 	end
 
 	def get_xml_lattes(id)
@@ -370,7 +529,8 @@ module ApplicationHelper
 
 		begin
 			tempfile = Tempfile.new("#{id}-img")
-			page = Crawler.instance.get "http://buscatextual.cnpq.br/buscatextual/sevletcaptcha?idcnpq=#{id}"
+			crawler = Crawler.new
+			page = crawler.get "http://buscatextual.cnpq.br/buscatextual/sevletcaptcha?idcnpq=#{id}"
 	    File.open(tempfile.path, 'wb') do |f|
 	      f.write page.body
 	    end
@@ -381,24 +541,27 @@ module ApplicationHelper
 
 			raise CaptchaError unless result != "" && result =~ /^[A-Z0-9]*$/
 			
-			page = Crawler.instance.get "http://buscatextual.cnpq.br/buscatextual/download.do?metodo=enviar&idcnpq=#{id}&palavra=#{result}"
+			page = crawler.get "http://buscatextual.cnpq.br/buscatextual/download.do?metodo=enviar&idcnpq=#{id}&palavra=#{result}"
 			tempfile = Tempfile.new("#{id}-zip")
-	    File.open(tempfile.path, 'wb') do |f|
-	      f.write page.body
-	    end
+	    File.open(tempfile.path, 'wb') do |f| f.write page.body end
 			has_doctype = File.read(tempfile).include? "DOCTYPE"
 			
-			raise DownloadZipError if has_doctype
+			if has_doctype
+				tempfile.unlink
+				tempfile.close
+				raise CaptchaError 
+			end
 			
 			xml = unzip_file(tempfile, id)
 			tempfile.unlink
 			tempfile.close
 
-
 		rescue CaptchaError => er
+			Rails.logger = Logger.new("log/app-dump.log")
+			Rails.logger.warn "CaptchaError"
 			#TODO limit retry
-			retry
-		rescue DownloadZipError => er
+			# puts $!, $@
+			print " ! "
 			retry
 		end
 		

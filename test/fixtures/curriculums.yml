@@ -3,7 +3,7 @@
 one:
   id16: MyString
   id10: MyString
-  lattes_updated_at: 2014-10-22
+  lattes_updated_at: 2014-10-24
   scholarship: MyString
   degree: MyString
   xml: 
@@ -11,7 +11,7 @@ one:
 two:
   id16: MyString
   id10: MyString
-  lattes_updated_at: 2014-10-22
+  lattes_updated_at: 2014-10-24
   scholarship: MyString
   degree: MyString
   xml: 

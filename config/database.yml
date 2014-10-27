@@ -9,7 +9,8 @@ default: &default
   # pool: 5
   # timeout: 5000
   adapter: postgresql
-  pool: 5
+  pool: 200
+  timeout: 10000
   username: postgres
   password: postgres
   host: 192.168.56.101

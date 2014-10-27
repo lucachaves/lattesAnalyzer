@@ -10,5 +10,6 @@ class CreateCurriculums < ActiveRecord::Migration
 
       t.timestamps
     end
+    add_index :curriculums, :id10, unique: true
   end
 end
