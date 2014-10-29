@@ -216,3 +216,182 @@ AREAS-DO-CONHECIMENTO
 @TITULO
 @ANO
 @IDIOMA
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+m.05v33x
+ns:rdf:type    ns:education.university;
+ns:type.object.name    "Federal University of Para\xedba"@en;
+ns:organization.organization.headquarters    ns:m.0jk7tcg;
+ns:common.topic.alias    "Federal University of Paraiba"@en;
+ns:common.topic.alias    "Universidade Federal da Para\xedba"@en;
+ns:common.topic.alias    "UFPB"@en;
+ns:common.topic.alias    "UFPB"@pt;
+
+m.0jk7tcg
+ns:rdf:type    ns:location.location
+ns:location.mailing_address.citytown    ns:m.01hy9d;
+
+m.01hy9d
+ns:rdf:type    ns:location.citytown;
+ns:common.topic.alias    "Joao Pessoa"@en;
+ns:type.object.name    "Jo\xe3o Pessoa"@es;
+ns:location.location.containedby    ns:m.015fr;
+ns:location.location.containedby    ns:m.01hdp5;
+
+015fr
+ns:type.object.type    ns:location.country;
+
+01hdp5
+ns:type.object.type    ns:location.administrative_division;
+
+
+
+ns:rdf:type    ns:education.university;
+ns:type.object.name    null;
+ns:organization.organization.headquarters    null;
+
+[{
+  "mid": null,
+  "name": null,
+  "type": "/education/university",
+  "/organization/organization/headquarters": [{
+    "/location/mailing_address/citytown": [{
+      "name": null
+    }]
+  }]
+}]
+
+[{
+  "mid": null,
+  "name": null,
+  "name~=": "University of Zurich",
+  "/common/topic/alias~=": "Universitat Zurich",
+  "type": "/education/university",
+  "/organization/organization/headquarters":[{
+  	"/location/mailing_address/citytown": [{
+  		"name": null,
+  		"/location/location/containedby": [{
+  			"type": "/location/country",
+  			"name": null
+  		}],
+  		"/location/location/containedby": [{
+  			"type": "/location/administrative_division",
+  			"name": null
+  		}]
+  	}]
+  }]
+}]
+
+FreebaseAPI.session.mqlread({
+  :type => '/internet/website',
+  :id => '/en/github',
+  :'/common/topic/official_website' => nil}
+)
+
+FreebaseAPI.session.mqlread({
+  :mid => nil,
+  :name => nil,
+  :'name~=' => "University of Zurich",
+  :type => "/education/university"
+})
+
+
+FreebaseAPI.session.mqlread({
+  :mid => nil,
+  :name => nil,
+  :'name~=' => "University of Zurich",
+  :type => "/education/university",
+  :'/organization/organization/headquarters' => {
+  	:'/location/mailing_address/citytown' => {
+  		:name => nil
+  	}
+  }
+ })
+
+FreebaseAPI.session.mqlread({
+  :mid => nil,
+  :name => nil,
+  :'name~=' => "University of Zurich",
+  :type => "/education/university",
+  :'/organization/organization/headquarters' =>[{
+  	:'/location/mailing_address/citytown' => [{
+  		:name => nil,
+  		:'/location/location/containedby' => [{
+  			:type => "/location/country",
+  			:name => nil
+  		}],
+  		:'/location/location/containedby' => [{
+  			:type => "/location/administrative_division",
+  			:name => nil
+  		}]
+  	}]
+  }]
+})
+
+FreebaseAPI.session.mqlread({
+  :mid => nil,
+  :name => nil,
+  :'name~=' => "University of Zurich",
+  :type => "/education/university",
+  :'/organization/organization/headquarters' =>{
+  	:'/location/mailing_address/citytown' => {
+  		:name => nil,
+  		:'/location/location/containedby' => {
+  			:type => "/location/country",
+  			:name => nil
+  		},
+  	}
+  }
+})
+
+
+FreebaseAPI.session.mqlread({
+  :mid => nil,
+  :name => nil,
+  :'name~=' => "University of Zurich",
+  :type => "/education/university",
+  :'/organization/organization/headquarters' =>{
+  	:'/location/mailing_address/citytown' => {
+  		:name => nil,
+  		:'/location/location/containedby' => [{
+  			:type => "/location/administrative_division",
+  			:name => nil
+  		}]
+  	}
+  }
+})
+
+
+
+
+FreebaseAPI.session.mqlread([{
+  :mid => nil,
+  :name => nil,
+  :'name~=' => "Paraiba",
+  :type => "/education/university",
+  :'/organization/organization/headquarters' =>[{
+  	:'/location/mailing_address/citytown' => [{
+  		:name => nil,
+  		:'/location/location/containedby' => [{
+  			:type => "/location/country",
+  			:name => nil
+  		}],
+  	}]
+  }]
+}])
