@@ -18,7 +18,8 @@ default: &default
 
 development:
   <<: *default
-  database: lattesdata
+  # database: lattesdata
+  database: lattesdatatest
   # database: db/development.sqlite3
 
 development_sec:

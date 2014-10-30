@@ -8,4 +8,8 @@ class Location < ActiveRecord::Base
 	  [city, uf, country].compact.join(', ')
 	end
 
+	def position
+		[latitude, longitude].compact.join(', ')
+	end
+
 end

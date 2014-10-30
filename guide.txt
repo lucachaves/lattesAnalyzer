@@ -60,10 +60,28 @@ https://developers.google.com/api-client-library/ruby/start/get_started
 
 Location.offset(4999).limit(1000).each{|l|
 Location.where(latitude:nil).each{|l|
-  if(l.address != '' && l.city != '' && l.country != '')
+  if(l.address != '' && l.city != nil && l.country != nil)
     l.valid?
     l.save
   end
+}
+University.limit(10).map{|u|
+  g = Geocoder.search(u.name)
+  g.first.data['address']['county'] if g.first != nil
+}
+
+locations = Person.all[0..1].map{|p|
+  p.degrees.map{|d|
+    l = d.course.university.location
+    puts d.name
+    puts d.course.university.name
+    puts d.course.university.location.address
+    g = nil
+    if(l.city == nil || l.country == nill)
+      g = Geocoder.search("#{d.course.university.name} #{l.city} #{l.country}")
+    end
+    (g.first != nil)?g.first.data['address']:nil
+  }
 }
 
 
