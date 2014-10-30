@@ -35,6 +35,7 @@ gem 'thread'
 gem 'mechanize'
 gem 'nokogiri'
 gem 'json'
+gem 'geocoder'
 # gem 'open-uri'
 
 # Use ActiveModel has_secure_password

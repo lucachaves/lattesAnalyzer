@@ -1,3 +1,72 @@
+air traffic routes
+flight path
+animating flight paths
+Direct Flights with Connections
+create flight path map d3
+Direct Flight Routes
+traffic flow
+
+D3
+http://ramblings.mcpher.com/Home/excelquirks/d3/flights
+http://xliberation.com/googlecharts/d3flights.html
+http://mbostock.github.io/d3/talk/20111116/airports.html
+http://techslides.com/map-direct-flights-with-d3/
+http://mbostock.github.io/d3/talk/20111116/airports.html
+https://github.com/mapmeld/flightmap
+http://techslides.com/demos/d3/direct-flights.html
+http://www.tnoda.com/blog/2014-04-02
+
+https://www.mapbox.com/mapbox-studio/#darwin
+https://www.mapbox.com/mapbox.js/example/v1.0.0/
+https://www.mapbox.com/mapbox.js/example/v1.0.0/animating-flight-paths/
+
+http://www.morethanamap.com/
+http://www.morethanamap.com/demos/visualization/flights
+
+http://rackpull.com/web-development/scrolling-map-animation/
+http://www.amcharts.com/demos/flight-routes-map/
+
+http://ramblings.mcpher.com/Home/excelquirks/getmaps/mapping/flight
+http://spatial.ly/2013/05/great-world-flight-paths-map/
+
+https://developers.google.com/maps/documentation/javascript/examples/polyline-simple
+http://gis.stackexchange.com/questions/62432/how-to-create-a-visualisation-of-the-worlds-aeronautical-flight-paths
+http://www.arcgis.com/home/webmap/viewer.html?webmap=abe4516f02af466db1f7c6376d485b85
+
+http://openflights.org/data.html
+http://planefinder.net/
+
+https://lucachaves.cartodb.com/
+
+tableau
+http://www.tableausoftware.com/support/manuals/quickstart
+http://community.tableausoftware.com/message/123829
+http://sciolisticramblings.wordpress.com/2013/11/15/flights-of-fancy/
+http://public.tableausoftware.com/download/workbooks/OpenFlightsDataExplorer?format=html
+
+
+
+
+https://www.ruby-toolbox.com/categories/geocoding___maps
+geocoder
+http://www.rahuljiresal.com/2014/02/reverse-geocode-coordinates-in-ruby/
+geokit
+https://github.com/geokit/geokit
+google maps
+https://developers.google.com/api-client-library/ruby/start/get_started
+
+
+
+
+Location.offset(4999).limit(1000).each{|l|
+Location.where(latitude:nil).each{|l|
+  if(l.address != '' && l.city != '' && l.country != '')
+    l.valid?
+    l.save
+  end
+}
+
+
 SELECT 
   locations.city, 
   locations.uf, 
@@ -32,6 +101,7 @@ sudo PKG_CONFIG_PATH=/usr/local/Cellar/imagemagick/6.8.9-7/lib/pkgconfig gem ins
 
 
 select pg_size_pretty(pg_database_size('lattesdata'));
+select pg_size_pretty(pg_table_size('curriculums'));
 
 https://github.com/sparklemotion/nokogiri/wiki/Cheat-sheet
 https://gist.github.com/rstacruz/1569572
@@ -63,7 +133,7 @@ rake db:migrate:redo VERSION=version
 
 rails generate model curriculum id16:string id10:string:uniq lattes_updated_at:date scholarship:string degree:string xml:xml
 rails generate model update lattes_updated_at:date:uniq curriculum:references
-rails generate model location city:string uf:string country:string country_abbr:string
+rails generate model location city:string uf:string country:string country_abbr:string latitude:float longitude:float
 rails generate model university name:string abbr:string organ:string location:references
 rails generate model course name:string university:references
 rails generate model degree name:string title:string year:integer course:references person:references
@@ -225,15 +295,20 @@ AREAS-DO-CONHECIMENTO
 
 
 
+http://dbpedia.org/page/Federal_University_of_Para%C3%ADba
+http://dbpedia.org/sparql
+select * where {
+?subject rdf:type <http://schema.org/CollegeOrUniversity>.
+?subject rdfs:label ?label.
+?subject 
+FILTER (lang(?label) = "en")
+} LIMIT 100
 
 
+MQL
+http://mql.freebaseapps.com/index
 
-
-
-
-
-
-
+http://www.freebase.com/m/05v33x
 m.05v33x
 ns:rdf:type    ns:education.university;
 ns:type.object.name    "Federal University of Para\xedba"@en;
@@ -298,6 +373,9 @@ ns:organization.organization.headquarters    null;
   }]
 }]
 
+
+https://github.com/PerfectMemory/freebase-api
+
 FreebaseAPI.session.mqlread({
   :type => '/internet/website',
   :id => '/en/github',
@@ -361,6 +439,10 @@ FreebaseAPI.session.mqlread({
 })
 
 
+:'name~=' => "Federal",
+:'name~=' => "Paraíba",
+:'name~=' => "University of Zurich",
+
 FreebaseAPI.session.mqlread({
   :mid => nil,
   :name => nil,
@@ -377,13 +459,10 @@ FreebaseAPI.session.mqlread({
   }
 })
 
-
-
-
 FreebaseAPI.session.mqlread([{
   :mid => nil,
   :name => nil,
-  :'name~=' => "Paraiba",
+  :'name~=' => "Federal",
   :type => "/education/university",
   :'/organization/organization/headquarters' =>[{
   	:'/location/mailing_address/citytown' => [{
@@ -395,3 +474,26 @@ FreebaseAPI.session.mqlread([{
   	}]
   }]
 }])
+
+FreebaseAPI.session.mqlread([{
+  :mid => nil,
+  :name => nil,
+  :'name~=' => "Federal",
+  :type => "/education/university",
+  :'/organization/organization/headquarters' =>[{
+    :'/location/mailing_address/citytown' => [{
+      :name => nil,
+      :'/location/location/containedby' => [{
+        :type => "/location/administrative_division",
+        :name => nil
+      }],
+    }]
+  }]
+}])
+
+x.map{|y| 
+  [
+    y["name"],
+    y["/organization/organization/headquarters"][0]["/location/mailing_address/citytown"][0]["/location/location/containedby"][0]["name"]
+  ]
+}

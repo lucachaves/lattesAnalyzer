@@ -273,22 +273,27 @@ module ApplicationHelper
 
 	def extract_location_data
 		start_time = Time.now
-		records = Curriculum.select{|c| c.id16 != nil}
+		records = Curriculum.find_by_sql("SELECT id16 FROM curriculums").map{|c| c['id16']}.select{|id| id != nil}
+		# records = Curriculum.select{|c| c.id16 != nil}
 		# records = Curriculum.all(:conditions => "id16 IS NOT NULL")
 		size = records.length
 		lattesPool = Thread.pool(30)
 		index = 0
 		@mutex = Mutex.new
 		
-		records.each{|record|
-			next unless Person.find_by(id16: record['id16']) == nil
+		records.each{|id16|
+			# next unless Person.find_by(id16: record['id16']) == nil
 			lattesPool.process do
 				begin
+					record = Curriculum.find_by_id16(id16)
 					data = extract_xml_data record
 					print " x "
 					record_research_data data if data != nil
 					print " d "
 					
+					@mutex.synchronize do
+						index += 1
+					end
 					percentege = ((index)/size.to_f*100).round 2
 					print "\n#D #{(index)}/#{size}: #{percentege}% "
 				rescue
@@ -296,9 +301,6 @@ module ApplicationHelper
 					logger.error "extract location data #{record['id16']}"
 					puts $!, $@
 				end
-			end
-			@mutex.synchronize do
-				index += 1
 			end
 		}
 		lattesPool.shutdown
@@ -321,9 +323,9 @@ module ApplicationHelper
 		# TODO Filtro ???
 
 		# todos
-		url = "http://buscatextual.cnpq.br/buscatextual/busca.do?metodo=forwardPaginaResultados&registros=0;10&query=%28+%2Bidx_nacionalidade%3Ae%29+or+%28+%2Bidx_nacionalidade%3Ab%29&analise=cv&tipoOrdenacao=null&paginaOrigem=index.do&mostrarScore=false&mostrarBandeira=false&modoIndAdhoc=null"
+		# url = "http://buscatextual.cnpq.br/buscatextual/busca.do?metodo=forwardPaginaResultados&registros=0;10&query=%28+%2Bidx_nacionalidade%3Ae%29+or+%28+%2Bidx_nacionalidade%3Ab%29&analise=cv&tipoOrdenacao=null&paginaOrigem=index.do&mostrarScore=false&mostrarBandeira=false&modoIndAdhoc=null"
 		# doutores
-		# url = "http://buscatextual.cnpq.br/buscatextual/busca.do?metodo=forwardPaginaResultados&registros=10;10&query=%28+%2Bidx_particao%3A1+%2Bidx_nacionalidade%3Ae%29+or+%28+%2Bidx_particao%3A1+%2Bidx_nacionalidade%3Ab%29&analise=cv&tipoOrdenacao=null&paginaOrigem=index.do&mostrarScore=false&mostrarBandeira=false&modoIndAdhoc=null"
+		url = "http://buscatextual.cnpq.br/buscatextual/busca.do?metodo=forwardPaginaResultados&registros=10;10&query=%28+%2Bidx_particao%3A1+%2Bidx_nacionalidade%3Ae%29+or+%28+%2Bidx_particao%3A1+%2Bidx_nacionalidade%3Ab%29&analise=cv&tipoOrdenacao=null&paginaOrigem=index.do&mostrarScore=false&mostrarBandeira=false&modoIndAdhoc=null"
 		page_size ||= 100
 
 		crawler = Crawler.new
@@ -337,14 +339,14 @@ module ApplicationHelper
 		index = 0
 		@mutex = Mutex.new
 		
-		# debugger
+		debugger
 		lattesPool = Thread.pool(30)
 		pages.each{|page|
 			lattesPool.process do
 				# todos
-				url = "http://buscatextual.cnpq.br/buscatextual/busca.do?metodo=forwardPaginaResultados&registros=#{page*page_size};#{page_size+20}&query=%28+%2Bidx_nacionalidade%3Ae%29+or+%28+%2Bidx_nacionalidade%3Ab%29&analise=cv&tipoOrdenacao=null&paginaOrigem=index.do&mostrarScore=false&mostrarBandeira=false&modoIndAdhoc=null"
+				# url = "http://buscatextual.cnpq.br/buscatextual/busca.do?metodo=forwardPaginaResultados&registros=#{page*page_size};#{page_size+20}&query=%28+%2Bidx_nacionalidade%3Ae%29+or+%28+%2Bidx_nacionalidade%3Ab%29&analise=cv&tipoOrdenacao=null&paginaOrigem=index.do&mostrarScore=false&mostrarBandeira=false&modoIndAdhoc=null"
 				#doutores
-				# url = "http://buscatextual.cnpq.br/buscatextual/busca.do?metodo=forwardPaginaResultados&registros=#{page*page_size};#{page_size+20}&query=%28+%2Bidx_particao%3A1+%2Bidx_nacionalidade%3Ae%29+or+%28+%2Bidx_particao%3A1+%2Bidx_nacionalidade%3Ab%29&analise=cv&tipoOrdenacao=null&paginaOrigem=index.do&mostrarScore=false&mostrarBandeira=false&modoIndAdhoc=null"
+				url = "http://buscatextual.cnpq.br/buscatextual/busca.do?metodo=forwardPaginaResultados&registros=#{page*page_size};#{page_size+20}&query=%28+%2Bidx_particao%3A1+%2Bidx_nacionalidade%3Ae%29+or+%28+%2Bidx_particao%3A1+%2Bidx_nacionalidade%3Ab%29&analise=cv&tipoOrdenacao=null&paginaOrigem=index.do&mostrarScore=false&mostrarBandeira=false&modoIndAdhoc=null"
 				begin
 					page_content = Crawler.new.get url
 					page_ids = page_content.body.scan(/\'[\dA-Z]{10}\'/)
