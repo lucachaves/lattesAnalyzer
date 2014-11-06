@@ -1,4 +1,11 @@
 Rails.application.routes.draw do
+
+  get 'location/:id/degree' => 'location#degrees_by_person'
+
+  get 'location/:id/locations' => 'location#location_by_person'
+
+  get 'location/index'
+
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
 

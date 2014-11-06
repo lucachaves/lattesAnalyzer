@@ -36,6 +36,7 @@ gem 'mechanize'
 gem 'nokogiri'
 gem 'json'
 gem 'geocoder'
+gem 'gmaps4rails'
 # gem 'open-uri'
 
 # Use ActiveModel has_secure_password

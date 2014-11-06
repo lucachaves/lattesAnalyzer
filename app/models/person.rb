@@ -4,4 +4,13 @@ class Person < ActiveRecord::Base
   has_many :degrees
   has_many :orientations
   has_one :work
+
+  def degree
+  	degrees.last.course.name if degrees.length > 0 
+  end
+
+  def born
+  	location
+  end
+
 end

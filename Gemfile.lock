@@ -48,6 +48,7 @@ GEM
     erubis (2.7.0)
     execjs (2.2.1)
     geocoder (1.2.5)
+    gmaps4rails (2.1.2)
     hike (1.2.3)
     http-cookie (1.0.2)
       domain_name (~> 0.5)
@@ -152,6 +153,7 @@ DEPENDENCIES
   coffee-rails (~> 4.0.0)
   debugger
   geocoder
+  gmaps4rails
   jbuilder (~> 2.0)
   jquery-rails
   json

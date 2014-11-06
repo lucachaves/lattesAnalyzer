@@ -1,3 +1,11 @@
+http://www.visualisingdata.com/
+http://www.visualisingdata.com/index.php/resources/
+http://www.visualisingdata.com/index.php/references/
+http://www.visualizing.org/
+
+Beautiful Visualization
+http://it-ebooks.info/book/283/
+
 air traffic routes
 flight path
 animating flight paths
@@ -5,6 +13,11 @@ Direct Flights with Connections
 create flight path map d3
 Direct Flight Routes
 traffic flow
+
+
+heatmap google maps
+density points
+https://developers.google.com/maps/documentation/javascript/examples/layer-heatmap
 
 D3
 http://ramblings.mcpher.com/Home/excelquirks/d3/flights
@@ -16,9 +29,19 @@ https://github.com/mapmeld/flightmap
 http://techslides.com/demos/d3/direct-flights.html
 http://www.tnoda.com/blog/2014-04-02
 
+Mapbox
 https://www.mapbox.com/mapbox-studio/#darwin
 https://www.mapbox.com/mapbox.js/example/v1.0.0/
 https://www.mapbox.com/mapbox.js/example/v1.0.0/animating-flight-paths/
+
+CartoDB
+http://cartodb.com/tour/
+
+Mapbox vs CartoDB
+http://www.phase2technology.com/blog/open-source-tool-sets-for-creating-high-density-maps/
+
+Leaflet
+https://www.mapbox.com/mapbox.js/example/v1.0.0/plain-leaflet/
 
 http://www.morethanamap.com/
 http://www.morethanamap.com/demos/visualization/flights
@@ -36,9 +59,26 @@ http://www.arcgis.com/home/webmap/viewer.html?webmap=abe4516f02af466db1f7c6376d4
 http://openflights.org/data.html
 http://planefinder.net/
 
+http://www.visualisingdata.com/index.php/2012/02/bio-diaspora-visualising-interactions-between-populations-and-travel/
+
+Flight Patterns
+http://www.aaronkoblin.com/work/flightpatterns/
+http://www.ted.com/talks/aaron_koblin?language=en
+http://www.citylab.com/commute/2012/05/visualizing-day-flight-paths-us/2072/
+http://www.wired.com/2014/03/plane-viz/
+
+Charting culture
+http://cultsci.net/
+https://www.youtube.com/watch?v=4gIhRkCcD4U&feature=youtu.be
+
+
+http://leafletjs.com/
+
+
 https://lucachaves.cartodb.com/
 
 tableau
+http://kb.tableausoftware.com/articles/knowledgebase/using-path-shelf-pattern-analysis
 http://www.tableausoftware.com/support/manuals/quickstart
 http://community.tableausoftware.com/message/123829
 http://sciolisticramblings.wordpress.com/2013/11/15/flights-of-fancy/
@@ -50,6 +90,10 @@ http://public.tableausoftware.com/download/workbooks/OpenFlightsDataExplorer?for
 https://www.ruby-toolbox.com/categories/geocoding___maps
 geocoder
 http://www.rahuljiresal.com/2014/02/reverse-geocode-coordinates-in-ruby/
+http://www.bing.com/maps/?FORM=Z9LH3
+http://www.openstreetmap.org/
+maps.google.com
+
 geokit
 https://github.com/geokit/geokit
 google maps
@@ -60,29 +104,69 @@ https://developers.google.com/api-client-library/ruby/start/get_started
 
 Location.offset(4999).limit(1000).each{|l|
 Location.where(latitude:nil).each{|l|
-  if(l.address != '' && l.city != nil && l.country != nil)
+  # if(l.address != '' && l.city != nil && l.country != nil)
     l.valid?
+    puts l.address
+    puts l.position
     l.save
-  end
-}
-University.limit(10).map{|u|
-  g = Geocoder.search(u.name)
-  g.first.data['address']['county'] if g.first != nil
+  # end
 }
 
-locations = Person.all[0..1].map{|p|
+locations = University.find_by_sql("SELECT universities.name FROM public.universities, public.locations WHERE universities.location_id = locations.id AND locations.country = '' AND locations.city = ''").map{|u|
+  g = Geocoder.search(u.name)
+  if !g.first.nil?
+    {
+      "uni"=>u.name,
+      "address" => g.first.data['address'],
+      "latlog" => "#{g.first.data['lat']}, #{g.first.data['lon']}"
+    }
+  else
+    nil
+  end
+}
+puts JSON.pretty_generate locations
+
+locations = Person.all[0..20].map{|p|
   p.degrees.map{|d|
     l = d.course.university.location
     puts d.name
     puts d.course.university.name
     puts d.course.university.location.address
     g = nil
-    if(l.city == nil || l.country == nill)
+    if(l.city.nil? || l.country.nil?)
       g = Geocoder.search("#{d.course.university.name} #{l.city} #{l.country}")
     end
-    (g.first != nil)?g.first.data['address']:nil
+    (g.first != nil)?
+      {"#{d.name}-#{d.course.university.name}"=>g.first.data['address'],"latlog"=>"#{g.first.data['lat']}, #{g.first.data['lon']}"}:
+      nil
   }
 }
+puts JSON.pretty_generate locations
+
+locations = Person.all[0..20].map{|p|
+  next if p.work.nil?
+  puts p.work.organ
+  l = p.work.university.location
+  puts l.address
+  g = nil
+  if(l.city.nil? || l.country.nil?)
+    g = Geocoder.search("#{d.course.university.name} #{l.city} #{l.country}")
+  else
+    next
+  end
+  (!g.first.nil?)?
+    {"#{d.organ}"=>g.first.data['address'],"latlog"=>"#{g.first.data['lat']}, #{g.first.data['lon']}"}:
+    nil
+}
+puts JSON.pretty_generate locations
+
+
+locations = Person.all[0..-1].map{|p|
+  next if p.born.nil?
+  l = p.born
+  l.address
+}
+puts JSON.pretty_generate locations
 
 
 SELECT 
@@ -140,6 +224,12 @@ http://stackoverflow.com/questions/12358682/rails-post-socketerror-getaddrinfo-t
 
 
 #rails generate model person id16:primary_key name:string lattes_updated_at:date location:references knowlegde:references --no-id
+
+Concurrency and Database Connections in RoR
+Multiple Connection
+FATAL: sorry, too many clients already
+https://devcenter.heroku.com/articles/concurrency-and-database-connections
+http://stackoverflow.com/questions/15086880/correct-setting-of-database-connection-pool-database-yml-for-single-threaded-rai
 
 Multiple Database
 http://stackoverflow.com/questions/17311199/connecting-to-multiple-databases-in-ruby-on-rails
@@ -323,6 +413,7 @@ FILTER (lang(?label) = "en")
 } LIMIT 100
 
 
+https://www.freebase.com/
 MQL
 http://mql.freebaseapps.com/index
 
@@ -515,3 +606,40 @@ x.map{|y|
     y["/organization/organization/headquarters"][0]["/location/mailing_address/citytown"][0]["/location/location/containedby"][0]["name"]
   ]
 }
+
+
+[XML, DTD, XSL] -> [SQL, DB, CSV]
+excel http://www.excel-easy.com/examples/xml.html
+http://xmltodb.sourceforge.net/
+http://sourceforge.net/projects/xmltodb/
+http://sourceforge.net/projects/xml2db/
+http://xml2sql.sourceforge.net/
+https://code.google.com/p/xml2csv-conv/
+http://sourceforge.net/projects/convertxmltocsv/
+
+http://www.altova.com/mapforce.html
+http://www.altova.com/xmlspy/database-xml.html
+
+http://www.convertcsv.com/csv-to-xml.htm
+http://www.luxonsoftware.com/converter/xmltocsv
+http://xmlgrid.net/xml2text.html
+
+https://github.com/philipmat/discogs-xml2db
+
+http://stackoverflow.com/questions/7941353/xml-dtd-sql-schema
+http://search.cpan.org/dist/SGML-DTDParse/bin/dtdparse
+http://search.cpan.org/~metzzo/XML-RDB/RDB.pm
+
+
+LATTES
+http://www.cnpq.br/web/guest/geral
+http://lattes.cnpq.br/
+http://www.cnpq.br/web/portal-lattes/outras-bases
+http://www.cnpq.br/web/portal-lattes/dados-e-estatisticas
+http://lmpl.cnpq.br/lmpl/
+
+DATABASE XML
+https://dev.mysql.com/doc/refman/5.5/en/load-xml.html
+
+http://www.oracle.com/us/products/database/berkeley-db/xml/overview/index.html
+http://docs.oracle.com/cd/B28359_01/appdev.111/b28419/d_xmlgen.htm#i1012053

@@ -13,28 +13,28 @@ default: &default
   timeout: 10000
   username: postgres
   password: postgres
-  # host: 192.168.56.101
-  host: 10.0.1.7
+  host: 192.168.56.101
+  # host: 10.0.1.7
+  database: lattesclean
 
 development:
   <<: *default
   # database: lattesdata
-  database: lattesdatatest
   # database: db/development.sqlite3
 
 development_sec:
   <<: *default
-  database: lattesdump
+  # database: lattesdump
 
 # Warning: The database defined as "test" will be erased and
 # re-generated from your development database when you run "rake".
 # Do not set this db to the same as development or production.
 test:
   <<: *default
-  database: lattesdata
+  # database: lattesdata
   # database: db/test.sqlite3
 
 production:
   <<: *default
-  database: lattesdata
+  # database: lattesdata
   # database: db/production.sqlite3

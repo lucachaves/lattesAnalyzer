@@ -296,6 +296,7 @@ module ApplicationHelper
 					data = extract_xml_data record
 					print " x "
 					
+					#TODO last degree
 					record_research_data data if data != nil
 					print " d "
 					
@@ -512,6 +513,7 @@ module ApplicationHelper
 	
 	def get_html_data_lattes(id)
 		#TODO inmemorium
+		# http://buscatextual.cnpq.br/buscatextual/visualizacv.do?metodo=apresentar&id=K4759331Y9
 		retry_attempts = 10
 		begin
 			page = Crawler.new.get  "http://buscatextual.cnpq.br/buscatextual/visualizacv.do?id=#{id}"
