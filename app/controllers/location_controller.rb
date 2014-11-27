@@ -1,4 +1,4 @@
-require 'debugger'
+# require 'debugger'
 
 class LocationController < ApplicationController
   def index
@@ -35,49 +35,66 @@ class LocationController < ApplicationController
 
   def location_by_person
     
-    # @person = Person.limit(100000)
-    @person = Person.all
+    @people = Person.limit(10000)
+    # @people = Person.all
     
     range = if params[:id] == "a"
-      @person[0..-1]
+      @people[0..-1]
     else
-      @person[0..params[:id].to_i]
+      @people[params[:id].to_i..params[:id].to_i]
     end
 
     @markers_set = []
     @polylines_set = []
+    @countries_set = []
     range.each{|person|
+      @person = person
     	locations = []
       # debugger
-    	locations << person.born unless person.born.nil?
-    	person.degrees.each{|d|
-    		locations << d.course.university.location
-    	}
-    	locations << person.work.university.location unless person.work.nil?
+    	# locations << @person.born unless @person.born.nil?
+    	# @person.degrees.each{|d|
+    	# 	locations << d.course.university.location unless d.course.university.location.nil?
+    	# }
+      @person.orientations.order(:year).each{|o|
+        locations << o.course.university.location unless o.course.university.location.nil?
+      }
+    	# locations << @person.work.university.location unless @person.work.nil?
 
     	markers = []
-    	locations.each{|l|
-  	  	point = {
-  	  		"lat" => l.latitude,
-  	  		"lng" => l.longitude
-  	  	}
-  	  	markers << point
-    	}
-
       polylines = []
-    	locations.each{|l|
+
+      locations.each{|l|
+        next if l.latitude == nil
         point = {
           "lat" => l.latitude,
-          "lng" => l.longitude,
-          "ele" => 0,
-    		  "time" => 0
+          "lng" => l.longitude
         }
-        polylines << point
-    	}
+        markers << point
+        @countries_set << l.country if !l.country.nil?
+      }
+
+      unless params[:id] == "a"
+        locations.each{|l|
+          next if l.latitude == nil
+          point = {
+            "lat" => l.latitude,
+            "lng" => l.longitude,
+            "ele" => 0,
+            "time" => 0
+          }
+          polylines << point
+        }
+      end
 
       @markers_set << markers
       @polylines_set << polylines
     }
+
+    @location_by_contry = {}
+    @countries_set.uniq.each{|country|
+      @location_by_contry[country] = @countries_set.count(country)
+    }
+    @location_by_contry = @location_by_contry.sort_by{|k,v| v}
   end
 
 end

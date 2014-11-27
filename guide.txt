@@ -112,7 +112,11 @@ Location.where(latitude:nil).each{|l|
   # end
 }
 
+
+
 locations = University.find_by_sql("SELECT universities.name FROM public.universities, public.locations WHERE universities.location_id = locations.id AND locations.country = '' AND locations.city = ''").map{|u|
+
+locations = University.find_by_sql("SELECT universities.name FROM public.universities, public.locations WHERE universities.location_id = locations.id AND locations.latitude IS NULL AND locations.longitude IS NULL")[0..100].map{|u|
   g = Geocoder.search(u.name)
   if !g.first.nil?
     {
@@ -125,6 +129,8 @@ locations = University.find_by_sql("SELECT universities.name FROM public.univers
   end
 }
 puts JSON.pretty_generate locations
+
+
 
 locations = Person.all[0..20].map{|p|
   p.degrees.map{|d|
@@ -450,6 +456,13 @@ ns:rdf:type    ns:education.university;
 ns:type.object.name    null;
 ns:organization.organization.headquarters    null;
 
+
+[{
+  "id": null,
+  "mid": null,
+  "name": "London"
+}]
+
 [{
   "mid": null,
   "name": null,
@@ -482,8 +495,27 @@ ns:organization.organization.headquarters    null;
   }]
 }]
 
-
 https://github.com/PerfectMemory/freebase-api
+https://www.freebase.com/query
+http://www.freebase.com/explore
+https://developers.google.com/freebase/
+Topic, RDF, MQL, Search
+http://wiki.freebase.com/wiki/Topic
+http://wiki.freebase.com/wiki/Types
+http://wiki.freebase.com/wiki/Domain
+http://wiki.freebase.com/wiki/Object
+/type/domain > /type/object/type > /common/topic
+https://developers.google.com/freebase/v1/getting-started
+https://www.freebase.com/search?query=Università di Pavia&lang=en&scoring=entity&prefixed=true&any=/common/topic
+https://www.googleapis.com/freebase/v1/search?query=Università di Pavia&indent=true&lang=en&scoring=entity&prefixed=true&any=/common/topic
+https://www.googleapis.com/freebase/v1/search?query=Università di Pavia&indent=true&any=/common/topic&limit=1
+https://www.googleapis.com/freebase/v1/search?indent=true&query=london
+https://www.googleapis.com/freebase/v1/search?indent=true&filter=(any type:/people/person)
+https://www.googleapis.com/freebase/v1/mqlread?query={"id": null,"mid": "/m/04jpl","name": "London"}
+https://www.googleapis.com/freebase/v1/topic/en/london
+https://www.googleapis.com/freebase/v1/rdf/en/london
+
+MQL
 
 FreebaseAPI.session.mqlread({
   :type => '/internet/website',
@@ -643,3 +675,235 @@ https://dev.mysql.com/doc/refman/5.5/en/load-xml.html
 
 http://www.oracle.com/us/products/database/berkeley-db/xml/overview/index.html
 http://docs.oracle.com/cd/B28359_01/appdev.111/b28419/d_xmlgen.htm#i1012053
+
+
+
+
+
+
+
+
+
+
+
+
+universities.name NOT SIMILAR TO '%(\-|\,|\/|\(|\))%' AND
+ universities.name NOT ILIKE '%universi%'  
+ universities.name NOT ILIKE '%estadu%' 
+ universities.name NOT ILIKE '%federal%' 
+ universities.name NOT ILIKE '%univ%'
+
+SELECT 
+  people.name
+FROM 
+  public.orientations, 
+  public.people
+WHERE 
+  orientations.person_id = people.id
+ORDER BY
+  people.name ASC;
+
+
+[{
+  "mid": null,
+  "name": null,
+  "name~=": "Kingston University",
+  "type": "/education/university",
+  "/organization/organization/headquarters":[{
+    "/location/mailing_address/citytown": [{
+      "name": null,
+      "/location/location/containedby": [{
+        "type": "/location/administrative_division",
+        "name": null,
+        "mid": null,
+        
+      }],
+    }]
+  }]
+}]
+
+[{
+  "id": null,
+  "name": null,
+  "name~=": "Tunas",
+  "type": "/education/university",
+  "/organization/organization/headquarters": [{
+    "/location/mailing_address/citytown": [{
+      "name": null,
+      "mid": null,
+      "id": null,
+      "/location/location/geolocation": [{
+        "mid": null,
+        "/location/geocode/latitude": null,
+        "/location/geocode/longitude": null
+      }]
+    }],
+    "/location/mailing_address/country": [{
+      "name": null,
+      "mid": null
+    }]
+  }]
+}]
+
+http://wiki.openstreetmap.org/wiki/Main_Page
+http://wiki.openstreetmap.org/wiki/Develop
+http://openlayers.org/
+http://www.gisgraphy.com/
+http://wiki.openstreetmap.org/wiki/WIWOSM
+http://nominatim.openstreetmap.org/
+http://wiki.openstreetmap.org/wiki/Nominatim
+http://nominatim.openstreetmap.org/search?q=highway,Kingston+University&format=json
+nominatim filter search by class???
+http://nominatim.openstreetmap.org/search/school,cleveland,oh?format=json
+http://nominatim.openstreetmap.org/reverse?format=json&lon=-0.2995&lat=51.4103
+https://www.mapbox.com/developers/api/geocoding/
+
+
+
+https://www.googleapis.com/freebase/v1/search?indent=true&query=Kingston+University&filter=(all type:/education/university )
+https://www.googleapis.com/freebase/v1/search?indent=true&query=john&filter=(all type:/people/person /people/person/nationality:"Canada")
+
+https://www.freebase.com/education
+https://www.freebase.com/education?schema=
+https://www.freebase.com/education/university
+https://www.freebase.com/education/university?schema=
+http://www.freebase.com/education/university?instances=
+
+https://www.freebase.com/organization/organization/headquarters?schema=
+
+https://www.freebase.com/location
+https://www.freebase.com/location?schema=
+https://www.freebase.com/location?instances=
+https://www.freebase.com/location/geocode?schema=
+https://www.freebase.com/location/citytown?schema=
+https://www.freebase.com/location/citytown?instances=
+https://www.freebase.com/location/mailing_address?schema=
+https://www.freebase.com/location/country?schema=
+http://www.freebase.com/location/country?instances=
+http://www.freebase.com/location/country?i18n=
+http://www.freebase.com/location/country?props=
+http://www.freebase.com/location/country?keys=
+http://www.freebase.com/location/country?links=
+'{"id":"/en/china","capital":null,"type":"/location/country"}'
+
+
+google maps
+https://developers.google.com/maps/documentation/geocoding/
+https://developers.google.com/places/documentation/supported_types
+geocoder filter by kind of place???
+http://maps.google.com/maps/api/geocode/json?address=Kingston+University&components=university:ES&sensor=false
+http://maps.googleapis.com/maps/api/staticmap?center=Berkeley,CA&zoom=14&size=400x400&sensor=false
+http://maps.googleapis.com/maps/api/staticmap?center=40.714728,-73.998672&zoom=14&size=400x400&sensor=false
+
+word frequency analyze
+http://www.tapor.ca/
+
+http://www.postgresql.org/docs/8.0/static/functions-matching.html
+rails find_or_create_by case insensitive
+
+
+
+Sending logs to Graylog2 server
+https://www.ruby-toolbox.com/categories/Log_Analysis
+https://github.com/Graylog2/gelf-rb
+http://www.graylog2.org/resources/documentation/sending/rails
+http://logstash.net/docs/1.4.2/tutorials/getting-started-with-logstash
+https://github.com/garethr/graylogtail
+https://scoutapp.com/plugin_urls
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#degrees
+
+SELECT 
+  people.name,
+  locations.city, 
+  locations.uf, 
+  locations.country, 
+  locations.latitude, 
+  locations.longitude
+FROM 
+  public.locations,
+  public.degrees, 
+  public.universities, 
+  public.people, 
+  public.courses
+WHERE 
+  people.id = degrees.person_id AND
+  courses.id = degrees.course_id AND
+  courses.university_id = universities.id AND
+  universities.location_id = locations.id AND
+  people.id IN (SELECT DISTINCT orientations.person_id FROM public.orientations)
+
+UNION ALL
+#works
+
+SELECT 
+  people.name,
+  locations.city, 
+  locations.uf, 
+  locations.country, 
+  locations.latitude, 
+  locations.longitude
+FROM 
+  public.locations, 
+  public.universities, 
+  public.people, 
+  public.works
+WHERE 
+  universities.location_id = locations.id AND
+  people.id = works.person_id AND
+  works.university_id = universities.id AND
+  people.id IN (SELECT DISTINCT orientations.person_id FROM public.orientations)
+
+UNION ALL
+#birth
+
+SELECT 
+  people.name,
+  locations.city, 
+  locations.uf, 
+  locations.country, 
+  locations.latitude, 
+  locations.longitude
+FROM 
+  public.people, 
+  public.locations
+WHERE 
+  people.location_id = locations.id AND
+  people.id IN (SELECT DISTINCT orientations.person_id FROM public.orientations)
+
+UNION ALL
+#orientations 
+
+SELECT 
+  people.name,
+  locations.city, 
+  locations.uf, 
+  locations.country, 
+  locations.latitude, 
+  locations.longitude
+FROM 
+  public.people, 
+  public.orientations, 
+  public.courses, 
+  public.universities, 
+  public.locations
+WHERE
+  courses.id = orientations.course_id AND
+  courses.university_id = universities.id AND
+  universities.location_id = locations.id
+
+;
+

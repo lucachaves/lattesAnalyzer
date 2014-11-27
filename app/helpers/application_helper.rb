@@ -29,8 +29,8 @@ module ApplicationHelper
 			begin
 				page = @agent.get url
 			rescue SocketError => error
-				Rails.logger = Logger.new("log/app-dump.log")
-				Rails.logger.warn "SocketError: #{url}"
+				@logger ||= Logger.new("log/app-dump.log")
+				@logger.warn "SocketError: #{url}"
 			  if flag < @retry_attempts
 			    flag += 1
 			    sleep flag*2 
@@ -62,8 +62,8 @@ module ApplicationHelper
 
 	def extract_xml_data(record)
 		if record['xml'].include? "<ERRO><MENSAGEM>Erro ao recuperar o XML</MENSAGEM></ERRO>"
-			Rails.logger = Logger.new("log/app-dump.log")
-			Rails.logger.info "XML #{record['id10']} com <ERRO>"
+			@logger ||= Logger.new("log/app-dump.log")
+			@logger.info "XML #{record['id10']} com <ERRO>"
 			return nil 
 		end
 
@@ -274,7 +274,7 @@ module ApplicationHelper
 	def extract_location_data
 		start_time = Time.now
 
-		mutex = Mutex.new
+		@mutex ||= Mutex.new
 		index = 0
 		total = Curriculum.count
 		page_size = 10000
@@ -300,14 +300,14 @@ module ApplicationHelper
 					record_research_data data if data != nil
 					print " d "
 					
-					mutex.synchronize do
+					@mutex.synchronize do
 						index += 1
 					end
 					
 					percentege = ((index)/size.to_f*100).round 2
 					print "\n#D #{(index)}/#{size}: #{percentege}% "
 				rescue
-					Rails.logger = Logger.new("log/app-dump.log")
+					@logger ||= Logger.new("log/app-dump.log")
 					logger.error "extract location data #{record['id16']}"
 					
 					puts $!, $@
@@ -319,15 +319,15 @@ module ApplicationHelper
 		time_diff = Time.now - start_time
 		time_diff = Time.at(time_diff.to_i.abs).utc.strftime "%H:%M:%S"
 		
-		Rails.logger = Logger.new("log/app-dump.log")
-		Rails.logger.info "Runtime of scrapy #{time_diff} - total #{size}"
+		@logger ||= Logger.new("log/app-dump.log")
+		@logger.info "Runtime of scrapy #{time_diff} - total #{size}"
 	end
 
 	alias_method :extract, :extract_location_data
 
 	def scrapy(load: false, sample: nil)
-		Rails.logger = Logger.new("log/app-dump.log")
-		Rails.logger.info "scrapy lattes dump"
+		@logger ||= Logger.new("log/app-dump.log")
+		@logger.info "scrapy lattes dump"
 
 		# UPDATE XMLs monthly
 		start_time = Time.now
@@ -349,16 +349,17 @@ module ApplicationHelper
 			page_size = 10000
 			ids = []
 			(0..(total/page_size)).each{|page|
+				print '>'
 				offset = page*page_size
 				ids += Curriculum.find_by_sql("SELECT curriculums.id10, curriculums.id16 FROM public.curriculums LIMIT #{page_size} OFFSET #{offset}").select{|c| c['id16'] == nil}.map{|c| c['id10']}
 			}
-			lattes_infos = ids
+			lattes_infos = ids.uniq
 			size = lattes_infos.length
 			index = 0
-			mutex = Mutex.new
+			@mutex ||= Mutex.new
 
 			puts "\n> size #{size}"
-
+			
 			lattesPool = Thread.pool(30)
 			lattes_infos.each{|id10|	
 				info = Curriculum.find_by_id10(id10)
@@ -392,18 +393,18 @@ module ApplicationHelper
 						curriculum.save
 						print " . "
 
-						mutex.synchronize do
+						@mutex.synchronize do
 							index += 1
 						end
 						percentege = (index/size.to_f*100).round 2
 						print "\n#X #{index}/#{size}: #{percentege}% "
 					rescue ScrapyError => er
-						Rails.logger = Logger.new("log/app-dump.log")
-						Rails.logger.error "Scrapy id10 #{info['id10']} with HTML old"
+						@logger ||= Logger.new("log/app-dump.log")
+						@logger.error "Scrapy id10 #{info['id10']} with HTML old"
 						puts $!, $@
 					rescue
-						Rails.logger = Logger.new("log/app-dump.log")
-						Rails.logger.error "Scrapy id10 #{info['id10']} - #{$!}"
+						@logger ||= Logger.new("log/app-dump.log")
+						@logger.error "Scrapy id10 #{info['id10']} - #{$!}"
 						puts $!, $@
 					end
 				end
@@ -424,16 +425,16 @@ module ApplicationHelper
 
 		time_diff = Time.now - start_time
 		time_diff = Time.at(time_diff.to_i.abs).utc.strftime "%H:%M:%S"
-		Rails.logger = Logger.new("log/app-dump.log")
-		Rails.logger.info "Runtime of scrapy #{time_diff} - total #{size}"
+		@logger ||= Logger.new("log/app-dump.log")
+		@logger.info "Runtime of scrapy #{time_diff} - total #{size}"
 
 		""
 	end
 
 	def load_lattes_dump(page_size:nil, number_page:nil)
 		# TODO Filtro ???
-		Rails.logger = Logger.new("log/app-dump.log")
-		Rails.logger.info "load lattes dump"
+		@logger ||= Logger.new("log/app-dump.log")
+		@logger.info "load lattes dump"
 		
 		start_time = Time.now
 
@@ -451,7 +452,7 @@ module ApplicationHelper
 		pages = (0..number_page)
 		ids = []
 		index = 0
-		mutex = Mutex.new
+		@mutex ||= Mutex.new
 		
 		lattesPool = Thread.pool(30)
 		pages.each{|page|
@@ -467,16 +468,16 @@ module ApplicationHelper
 						ids << research[1..-2]
 					}
 
-					Rails.logger = Logger.new("log/app-dump.log")
-					Rails.logger.info "Load #{page_ids[0..(page_size-1)].length} ids from page #{page}"
-					mutex.synchronize do
+					@logger ||= Logger.new("log/app-dump.log")
+					@logger.info "Load #{page_ids[0..(page_size-1)].length} ids from page #{page}"
+					@mutex.synchronize do
 						index += 1
 					end
 					percentege = ((index)/number_page.to_f*100).round 2
 					print "\n#P #{(index)}/#{number_page}: #{percentege}% "
 				rescue
-					Rails.logger = Logger.new("log/app-dump.log")
-					Rails.logger.error "Load id10 #{url}"
+					@logger ||= Logger.new("log/app-dump.log")
+					@logger.error "Load id10 #{url}"
 					puts $!, $@
 				end
 			end
@@ -490,14 +491,14 @@ module ApplicationHelper
 			lattesPool.process do
 				begin
 					Curriculum.find_or_create_by(id10: id10)
-					mutex.synchronize do
+					@mutex.synchronize do
 						index += 1
 					end
 					percentege = ((index)/size.to_f*100).round 2
 					print "\n#D #{(index)}/#{size}: #{percentege}% "
 				rescue
-					Rails.logger = Logger.new("log/app-dump.log")
-					Rails.logger.error "Record id10 #{id10} #{$!}"
+					@logger ||= Logger.new("log/app-dump.log")
+					@logger.error "Record id10 #{id10} #{$!}"
 					puts $!, $@
 				end
 			end
@@ -505,8 +506,8 @@ module ApplicationHelper
 		lattesPool.shutdown
 		time_diff = Time.now - start_time
 		time_diff = Time.at(time_diff.to_i.abs).utc.strftime "%H:%M:%S"
-		Rails.logger = Logger.new("log/app-dump.log")
-		Rails.logger.info "Runtime of load #{time_diff} - total ids #{size} from total #{total} recordos"
+		@logger ||= Logger.new("log/app-dump.log")
+		@logger.info "Runtime of load #{time_diff} - total ids #{size} from total #{total} recordos"
 	end
 
 	alias_method :load, :load_lattes_dump
@@ -529,8 +530,8 @@ module ApplicationHelper
 			raise DownloadHtmlError if info[:id16] == nil
 			return info
 		rescue DownloadHtmlError
-			Rails.logger = Logger.new("log/app-dump.log")
-			Rails.logger.error "Get HTML id10 #{id}"
+			@logger ||= Logger.new("log/app-dump.log")
+			@logger.error "Get HTML id10 #{id}"
 			if flag < retry_attempts
 		    flag += 1
 		    sleep flag*2 
@@ -575,8 +576,8 @@ module ApplicationHelper
 			tempfile.close
 
 		rescue CaptchaError => er
-			Rails.logger = Logger.new("log/app-dump.log")
-			Rails.logger.warn "CaptchaError"
+			@logger ||= Logger.new("log/app-dump.log")
+			@logger.warn "CaptchaError"
 			#TODO limit retry
 			# puts $!, $@
 			print " ! "
@@ -605,10 +606,258 @@ module ApplicationHelper
 	end
 
 	# TODO
+
+	def process_xml_size
+	end
+
 	def process_last_degree
+		ids = Curriculum.where("degree IS NULL").pluck(:id).sort
+		puts '>>ids'
+		lattesPool = Thread.pool(50)
+		ids.each{|id|
+			lattesPool.process do
+				print " [#{id}-#{(id/ids.size.to_f*100).round 2}%] " if id%150 == 0
+				c = Curriculum.find(id)
+				if c.xml.nil?
+					next
+				else
+					next if c.xml.include? "<ERRO><MENSAGEM>Erro ao recuperar o XML</MENSAGEM></ERRO>"
+					xmldoc = Nokogiri::XML(c.xml)
+					degrees = []
+					xmldoc.xpath("//FORMACAO-ACADEMICA-TITULACAO").children.each{|d|
+						degrees.append(d.name)
+					}
+					c.degree = degrees.join(', ')
+				end
+				c.save
+				c = nil
+				GC.start if id%10000 == 0
+			end
+		}
+		lattesPool.shutdown
+	end
+
+	def process_count_xml
+		ids = Curriculum.where("xml_size IS NULL").pluck(:id).sort
+		puts '>>ids'
+		lattesPool = Thread.pool(50)
+		ids.each{|id|
+			lattesPool.process do
+				print " [#{id}-#{(id/ids.size.to_f*100).round 2}%] " if id%150 == 0
+				c = Curriculum.find(id)
+				if c.xml.nil?
+					c.xml_size = 0
+				else
+					c.xml_size = c.xml.bytesize
+				end
+				c.save
+				c = nil
+				GC.start if id%10000 == 0
+				# xml.include? "<ERRO><MENSAGEM>Erro ao recuperar o XML</MENSAGEM></ERRO>"
+			end
+		}
+		lattesPool.shutdown
 	end
 
 	def process_location_degree
+	end
+
+	def normalize_brazilian_locations
+	end
+
+	def normalize_country
+		# lattesPool ||= Thread.pool(40)
+		# Location.all.each{|l|
+		# 	lattesPool.process do
+		# 		if(l.country != l.country.downcase)
+		# 			l.country = l.country.downcase
+		# 			l.save
+		# 		end
+		# 	end
+		# }
+		# lattesPool.shutdown
+
+		country_empty = Location.all.order('country ASC').select{|l| l.country == "" || l.country.nil?}
+		country_empty.each{|l|
+			if !l.latitude.nil?
+				r = Geocoder.search("#{l.latitude}, #{l.longitude}")
+				l.country = r[0].country.downcase
+				puts l.address+"?"
+				answer = gets.chop
+				# next if answer == ""
+				l.save
+			end
+		}
+
+		# countries = Location.all.order('country ASC').select{|l| l.country != "" && !l.country.nil?}.map{|l| l.country}.uniq
+		# @session ||= FreebaseAPI::Session.new(key: 'AIzaSyA4_6cLNet248boQno8NUBAGES89iypXUc', env: :stable)
+		# offset = 0
+		# countries[offset..-1].each_with_index{|country, index|
+		# 	puts "\n##{index+offset}"
+		# 	search = @session.search(country, {scoring: 'entity', filter: '(all type:/location/country)'})
+		# 	next if search != []
+		# 	# next if search.first['name'].downcase == country
+		# 	search = (search == [])? '' : search.first['name'].downcase
+		# 	# puts "Country: "+country
+		# 	# puts "Result: "+search
+		# 	print "\nDo you want?(\\n,o,n) "
+		# 	puts search.downcase+" <- "+country
+		# 	answer = gets.chop
+		# 	next if answer == ""
+		# 	if answer == "n"
+		# 		puts "Enter new name"
+		# 		answer = gets.chop
+		# 	end
+		# 	country_name = (answer == "o")? search : answer
+		# 	result = Location.where("lower(country) = ?", country.downcase)
+		# 	result = Location.where("country = ?", country) if result == []
+		# 	lattesPool ||= Thread.pool(40)
+		# 	result.each{|r|
+		# 		lattesPool.process do
+		# 			puts r.country+"->"+country_name
+		# 			r.country =  country_name
+		# 			r.save
+		# 			r = nil
+		# 		end
+		# 	}
+		# 	lattesPool.shutdown
+		# }
+
+	end
+
+	def process_location_university
+		# locations = University.find_by_sql("SELECT universities.id FROM public.universities, public.locations WHERE universities.location_id = locations.id AND locations.latitude IS NULL AND locations.longitude IS NULL AND locations.country = ''")
+		locations = University.find_by_sql("SELECT universities.id FROM public.universities, public.locations WHERE universities.location_id = locations.id AND locations.latitude IS NULL AND locations.longitude IS NULL AND locations.country = '' AND universities.name LIKE '%universi%'")
+		# countFail = 0
+		lattesPool = Thread.pool(30)
+		# locations[-13000..-10000].each{|uni|
+		locations.each{|uni|
+			lattesPool.process do
+				uni = University.find(uni['id'])
+				next if uni.name == ""
+				print "\n"+uni.name+" "
+				# result = process_location_university_geolocation(uni.name)
+				result = process_location_university_freebase(uni.name)
+				if !result.nil?
+					uni.location = Location.find_or_create_by city: result[:city],
+						country: result[:country],
+						latitude: result[:lat],
+						longitude: result[:lon] 
+					uni.save
+					uni = nil		  
+			   	print '.'
+		    else
+		    	print 'x'
+		    	# countFail += 1
+			  end
+			end
+		}
+		lattesPool.shutdown
+		''
+		# countFail
+	end
+
+	def process_location_university_geolocation(name)
+		# TODO search by unisity class or type
+	  g = Geocoder.search(name)
+	  return nil if g.first.nil?
+  	{
+    	city: g.first.data['address']['city'],
+    	country: g.first.data['address']['country'],
+    	lat: g.first.data['lat'],
+    	lon: g.first.data['lon']
+  	}
+	end
+
+	def process_location_university_freebase(name)
+		mql = mql(name)
+		@session ||= FreebaseAPI::Session.new(key: 'AIzaSyA4_6cLNet248boQno8NUBAGES89iypXUc', env: :stable)
+		result = @session.mqlread(mql)
+		# binding.pry  
+		if result == []
+			# https://www.googleapis.com/freebase/v1/search?query=Università di Pavia&indent=true&any=/common/topic&limit=1
+			search = @session.search(name, filter: '(all type:/common/topic)')
+			return nil if search == []
+			name = search.first["name"]
+			# binding.pry  
+			result = @session.mqlread(mql(name))
+			if result.nil?
+				result = @session.mqlread(mql_city(name)) 
+			end
+			return nil if result == []
+			# binding.pry 
+		end
+		# binding.pry 
+		citytown = result.first["/organization/organization/headquarters"]["/location/mailing_address/citytown"]
+		country = result.first["/organization/organization/headquarters"]["/location/mailing_address/country"]
+		country = if country.nil?
+			nil
+		else
+			country["name"]["value"]
+		end
+		{
+			city: citytown["name"],
+			country: country,
+			lat: citytown["/location/location/geolocation"]["/location/geocode/latitude"],
+			lon: citytown["/location/location/geolocation"]["/location/geocode/longitude"]
+		}
+	end
+
+	def mql(name)
+		[{
+		  :mid => nil,
+		  :name => nil,
+		  :'name~=' => name,
+		  :type => "/education/university",
+		  :'/organization/organization/headquarters' =>{
+		    :'/location/mailing_address/citytown' => {
+		      # :name => {
+		      # 	:value => nil,
+		      # 	:lang => "/lang/pt"
+		      # },
+		      :name => nil,
+		      :mid => nil,
+		      :id => nil,
+		      :'/location/location/geolocation' => {
+		        :mid => nil,
+		        :'/location/geocode/latitude' => nil,
+		        :'/location/geocode/longitude' => nil
+		      }
+		    },
+		    :'/location/mailing_address/country' => {
+		      :name => {
+		      	:value => nil,
+		      	:lang => "/lang/pt"
+		      },
+		      :mid => nil
+		    }
+		  }
+		}]
+	end
+
+	def mql_city(name)
+		[{
+		  :mid => nil,
+		  :name => nil,
+		  :'name~=' => name,
+		  :type => "/education/university",
+		  :'/organization/organization/headquarters' =>{
+		    :'/location/mailing_address/citytown' => {
+		      # :name => {
+		      # 	:value => nil,
+		      # 	:lang => "/lang/pt"
+		      # },
+		      :name => nil,
+		      :mid => nil,
+		      :id => nil,
+		      :'/location/location/geolocation' => {
+		        :mid => nil,
+		        :'/location/geocode/latitude' => nil,
+		        :'/location/geocode/longitude' => nil
+		      }
+		    }
+		  }
+		}]
 	end
 
 end

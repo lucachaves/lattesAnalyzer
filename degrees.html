@@ -1,0 +1,192 @@
+<html>
+<head>
+  <script type='text/javascript' src='https://www.google.com/jsapi'></script>
+  <script type='text/javascript'>
+   google.load('visualization', '1', {'packages': ['geomap']});
+   google.setOnLoadCallback(drawMap);
+
+    function drawMap() {
+      var data = google.visualization.arrayToDataTable([
+        ['country', 'degrees'],
+        // degrees
+      //   ["belarus", 1],
+      //   ["namibia", 1],
+      //   ["hong kong", 1],
+      //   ["são tomé and príncipe", 1],
+      //   ["china", 1],
+      //   ["algeria", 1],
+      //   ["costa rica", 1],
+      //   ["indonesia", 1],
+      //   ["tunisia", 1],
+      //   ["vietnam", 1],
+      //   ["ghana", 1],
+      //   ["malaysia", 1],
+      //   ["great britain", 1],
+      //   ["cameroon", 1],
+      //   ["oman", 1],
+      //   ["belize", 1],
+      //   ["democratic republic of the congo", 1],
+      //   ["slovenia", 1],
+      //   ["vatican", 2],
+      //   ["nicaragua", 2],
+      //   ["india", 2],
+      //   ["egypt", 2],
+      //   ["ecuador", 2],
+      //   ["poland", 2],
+      //   ["angola", 2],
+      //   ["south africa", 2],
+      //   ["finland", 2],
+      //   ["serbia", 2],
+      //   ["panama", 2],
+      //   ["venezuela", 3],
+      //   ["norway", 3],
+      //   ["new zealand", 4],
+      //   ["denmark", 4],
+      //   ["grenada", 4],
+      //   ["uruguay", 5],
+      //   ["ireland", 5],
+      //   ["russia", 6],
+      //   ["bolivia", 6],
+      //   ["israel", 7],
+      //   ["scotland", 11],
+      //   ["cuba", 13],
+      //   ["colombia", 14],
+      //   ["austria", 14],
+      //   ["peru", 15],
+      //   ["chile", 17],
+      //   ["paraguay", 17],
+      //   ["sweden", 18],
+      //   ["switzerland", 19],
+      //   ["mexico", 24],
+      //   ["belgium", 31],
+      //   ["netherlands", 31],
+      //   ["japan", 37],
+      //   ["australia", 38],
+      //   ["argentina", 44],
+      //   ["italy", 94],
+      //   ["canada", 99],
+      //   ["united kingdom", 137],
+      //   ["england", 153],
+      //   ["portugal", 163],
+      //   ["germany", 188],
+      //   ["spain", 205],
+      //   ["france", 453],
+      //   ["united states", 788],
+        // ["brazil", 27206]
+
+        // born
+        // ["costa rica", 1],
+        // ["nigeria", 1],
+        // ["egypt", 1],
+        // ["zimbabwe", 1],
+        // ["turkey", 1],
+        // ["suriname", 1],
+        // ["cape verde", 1],
+        // ["south korea", 1],
+        // ["angola", 1],
+        // ["honduras", 1],
+        // ["belarus", 1],
+        // ["new zealand", 1],
+        // ["netherlands", 1],
+        // ["lybia", 1],
+        // ["nicaragua", 1],
+        // ["bulgaria", 1],
+        // ["dominican republic", 1],
+        // ["benin", 1],
+        // ["democratic republic of the congo", 1],
+        // ["taiwan", 1],
+        // ["austria", 2],
+        // ["lebanon", 2],
+        // ["russia", 2],
+        // ["paraguay", 2],
+        // ["canada", 2],
+        // ["india", 2],
+        // ["venezuela", 2],
+        // ["hungary", 2],
+        // ["bolivia", 2],
+        // ["japan", 3],
+        // ["colombia", 3],
+        // ["el salvador", 4],
+        // ["germany", 4],
+        // ["china", 4],
+        // ["chile", 5],
+        // ["cuba", 6],
+        // ["england", 6],
+        // ["france", 7],
+        // ["spain", 10],
+        // ["uruguay", 10],
+        // ["portugal", 12],
+        // ["italy", 13],
+        // ["peru", 13],
+        // ["united states", 15],
+        // ["argentina", 17],
+        // ["brazil", 9763]
+
+        // orientations
+        ["moldova", 1],
+        ["kenya", 1],
+        ["japan", 1],
+        ["egypt", 1],
+        ["iran", 1],
+        ["uzbekistan", 1],
+        ["south africa", 1],
+        ["austria", 1],
+        ["luxembourg", 1],
+        ["cape verde", 1],
+        ["costa rica", 2],
+        ["georgia", 2],
+        ["finland", 2],
+        ["scotland", 2],
+        ["mozambique", 2],
+        ["bahrain", 2],
+        ["mauritius", 2],
+        ["venezuela", 2],
+        ["czech republic", 2],
+        ["denmark", 3],
+        ["bolivia", 4],
+        ["peru", 4],
+        ["uruguay", 4],
+        ["switzerland", 5],
+        ["ecuador", 5],
+        ["australia", 5],
+        ["great britain", 6],
+        ["india", 7],
+        ["mexico", 9],
+        ["belgium", 10],
+        ["sweden", 12],
+        ["chile", 12],
+        ["russia", 13],
+        ["england", 15],
+        ["canada", 15],
+        ["italy", 20],
+        ["netherlands", 22],
+        ["colombia", 24],
+        ["germany", 39],
+        ["argentina", 40],
+        ["united states", 54],
+        ["paraguay", 58],
+        ["france", 60],
+        ["cuba", 125],
+        ["portugal", 151],
+        ["spain", 168],
+        // ["brazil", 54096]
+
+      ]);
+
+      var options = {};
+      options['region'] = 'world';
+      options['dataMode'] = 'regions';
+
+      var container = document.getElementById('map_canvas');
+      var geomap = new google.visualization.GeoMap(container);
+      geomap.draw(data, options);
+    };
+
+  </script>
+</head>
+
+<body>
+    <div id='map_canvas'></div>
+</body>
+
+</html>

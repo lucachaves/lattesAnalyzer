@@ -13,9 +13,12 @@ default: &default
   timeout: 10000
   username: postgres
   password: postgres
-  host: 192.168.56.101
-  # host: 10.0.1.7
-  database: lattesclean
+  # host: 192.168.56.101
+  # host: 192.168.0.10
+  host: 10.0.1.7
+  database: lattesdata
+  # database: lattesclean
+  # database: lattesdatatest
 
 development:
   <<: *default

@@ -1,8 +1,8 @@
 Geocoder.configure(
   # geocoding options
   # :http_headers => { "User-Agent" => "luiz.chaves@ifpb.edu.br" },
-  # :timeout      => 5,           # geocoding service timeout (secs)
-  # :lookup       => :nominatim,     # name of geocoding service (symbol) :bing, :nominatim, :google, yahoo???
+  :timeout      => 5,           # geocoding service timeout (secs)
+  :lookup       => :nominatim,     # name of geocoding service (symbol) :bing, :nominatim, :google, yahoo???
   # :language     => :en,         # ISO-639 language code
   # :use_https    => false,       # use HTTPS for lookup requests? (if supported)
   # :http_proxy   => nil,         # HTTP proxy server (user:pass@host:port)
