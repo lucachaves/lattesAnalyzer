@@ -187,86 +187,97 @@ module ApplicationHelper
 		research
 	end
 
+	def format string
+		string = string.tr(
+			"ÀÁÂÃÄÅàáâãäåĀāĂăĄąÇçĆćĈĉĊċČčÐðĎďĐđÈÉÊËèéêëĒēĔĕĖėĘęĚěĜĝĞğĠġĢģĤĥĦħÌÍÎÏìíîïĨĩĪīĬĭĮįİıĴĵĶķĸĹĺĻļĽľĿŀŁłÑñŃńŅņŇňŉŊŋÒÓÔÕÖØòóôõöøŌōŎŏŐőŔŕŖŗŘřŚśŜŝŞşŠšſŢţŤťŦŧÙÚÛÜùúûüŨũŪūŬŭŮůŰűŲųŴŵÝýÿŶŷŸŹźŻżŽž_",
+			"AAAAAAaaaaaaAaAaAaCcCcCcCcCcDdDdDdEEEEeeeeEeEeEeEeEeGgGgGgGgHhHhIIIIiiiiIiIiIiIiIiJjKkkLlLlLlLlLlNnNnNnNnnNnOOOOOOooooooOoOoOoRrRrRrSsSsSsSssTtTtTtUUUUuuuuUuUuUuUuUuUuWwYyyYyYZzZzZz "
+		)
+		string.downcase
+	end
+
 	def record_research_data research
 		# Person
 		p = Person.find_or_create_by id16: research[:id16], 
-			id10: research[:id10], 
-			name: research[:name], 
-			scholarship: research[:scholarship], 
+			id10: format(research[:id10]), 
+			name: format(research[:name]), 
+			scholarship: format(research[:scholarship]), 
 			lattes_updated_at: research[:lattes_updated_at]
 
 		# Birth
-		p.location = Location.find_or_create_by city: research[:birth][:location][:city], 
-			uf: research[:birth][:location][:uf], 
-			country: research[:birth][:location][:country]
+		p.location = Location.find_or_create_by city: format(research[:birth][:location][:city]), 
+			uf: format(research[:birth][:location][:uf]), 
+			country: format(research[:birth][:location][:country])
 
 		# Work
-		l = Location.find_or_create_by city: research[:work][:location][:city], 
-				uf: research[:work][:location][:uf], 
-				country: research[:work][:location][:country]
-		u = University.find_or_create_by name: research[:work][:university], location: l
-		p.work = Work.find_or_create_by organ: research[:work][:organ], university: u
+		l = Location.find_or_create_by city: format(research[:work][:location][:city]), 
+				uf: format(research[:work][:location][:uf]), 
+				country: format(research[:work][:location][:country])
+		u = University.find_or_create_by name: format(research[:work][:university]), location: l
+		p.work = Work.find_or_create_by organ: format(research[:work][:organ]), university: u
 
 		# Degrees
 		research[:degree].each{|degree|
-			l = Location.find_or_create_by country: degree[:location][:country], 
-				country_abbr: degree[:location][:country_abbr], 
-				uf: degree[:location][:uf_abbr]
-			u = University.find_or_create_by name: degree[:university], 
-				abbr: degree[:university_abbr], 
+			l = Location.find_or_create_by country: format(degree[:location][:country]), 
+				country_abbr: format(degree[:location][:country_abbr]), 
+				uf: format(degree[:location][:uf_abbr])
+			u = University.find_or_create_by name: format(degree[:university]), 
+				abbr: format(degree[:university_abbr]), 
 				location: l
-			c = Course.find_or_create_by name: degree[:course], 
+			c = Course.find_or_create_by name: format(degree[:course]), 
 				university: u
-			p.degrees << Degree.find_or_create_by(
-				name: degree[:formation], 
-				year: degree[:year], 
-				title: degree[:title], 
+			degree = Degree.find_or_create_by(
+				name: format(degree[:formation]), 
+				year: format(degree[:year]), 
+				title: format(degree[:title]), 
 				course: c
 			)
+			p.degrees << degree if !p.degrees.exists? degree
 		}
 
 		# Knowledges
 		research[:knowledge].each{|knowledge|	
-			p.knowledges << Knowledge.find_or_create_by(
-					major_subject: knowledge[:major_subject],
-					major_subject: knowledge[:major_subject],
-					subject: knowledge[:subject],
-					subsection: knowledge[:subsection],
-					specialty: knowledge[:specialty]
+			knowledge = Knowledge.find_or_create_by(
+					major_subject: format(knowledge[:major_subject]),
+					major_subject: format(knowledge[:major_subject]),
+					subject: format(knowledge[:subject]),
+					subsection: format(knowledge[:subsection]),
+					specialty: format(knowledge[:specialty])
 				)
+			p.knowledges << knowledge if !p.knowledges.exists? knowledge
 		}
 
 		# Orientations
 		research[:orientation].each{|o|
-			l = Location.find_or_create_by uf: o[:university][:location][:uf_abbr], 
-				country_abbr: o[:university][:location][:uf_country], 
-				country: o[:university][:location][:country]
+			l = Location.find_or_create_by uf: format(o[:university][:location][:uf_abbr]), 
+				country_abbr: format(o[:university][:location][:uf_country]), 
+				country: format(o[:university][:location][:country])
 
-			u = University.find_or_create_by name: o[:university][:name],
-				abbr: o[:university][:abbr],
+			u = University.find_or_create_by name: format(o[:university][:name]),
+				abbr: format(o[:university][:abbr]),
 				location: l
 		
-			c = Course.find_or_create_by name: o[:course][:name],
+			c = Course.find_or_create_by name: format(o[:course][:name]),
 				university: u
 			
-			k = Knowledge.find_or_create_by major_subject: o[:course][:knowledge][:major_subject],
-					major_subject: o[:course][:knowledge][:major_subject],
-					subject: o[:course][:knowledge][:subject],
-					subsection: o[:course][:knowledge][:subsection],
-					specialty: o[:course][:knowledge][:specialty]
+			k = Knowledge.find_or_create_by major_subject: format(o[:course][:knowledge][:major_subject]),
+					major_subject: format(o[:course][:knowledge][:major_subject]),
+					subject: format(o[:course][:knowledge][:subject]),
+					subsection: format(o[:course][:knowledge][:subsection]),
+					specialty: format(o[:course][:knowledge][:specialty])
 			
-			p.orientations << Orientation.find_or_create_by(
-				document: o[:document],
-				kind: o[:kind],
-				title: o[:title],
-				year: o[:year],
-				language: o[:language],
-				orientation: o[:orientation],
-				student: o[:student],
-				formation: o[:formation],
+			orientation = Orientation.find_or_create_by(
+				document: format(o[:document]),
+				kind: format(o[:kind]),
+				title: format(o[:title]),
+				year: format(o[:year]),
+				language: format(o[:language]),
+				orientation: format(o[:orientation]),
+				student: format(o[:student]),
+				formation: format(o[:formation]),
 				course: c,
 				knowledge: k
 			)
+			p.orientations << orientation if !p.!orientations.exists? orientation
 		}
 		p.save
 	end
@@ -389,7 +400,8 @@ module ApplicationHelper
 						curriculum.scholarship = data[:scholarship]
 						curriculum.lattes_updated_at = lattes_updated_at
 						curriculum.xml = xml
-						curriculum.updates << Update.find_or_create_by(lattes_updated_at: lattes_updated_at)
+						update = Update.find_or_create_by(lattes_updated_at: lattes_updated_at)
+						curriculum.updates << update if !curriculum.updates.exists? update
 						curriculum.save
 						print " . "
 
@@ -605,45 +617,203 @@ module ApplicationHelper
 	  }
 	end
 
-	# TODO
+	def process_knowledge
+		start_time = Time.now
+		# ids = Curriculum.where("orientation IS NULL").pluck(:id).sort{|x, y| y <=> x}
+		# ids = Curriculum.limit(1000).pluck(:id).sort
+		# ids = Curriculum.pluck(:id).sort#{|x, y| y <=> x}
+		# ids = (896001..Curriculum.count)
+		ids = (2203600..3911585)
+		puts ">>ids - #{ids.size}"
+		lattesPool = Thread.pool(70)
+		ids.each_with_index{|id, index|
+			lattesPool.process do
+				begin
+					if index%600 == 0
+						utc_jp = 3600*3
+						start_time_format = Time.at(start_time.to_i.abs-utc_jp).utc.strftime "%d/%m/%Y %H:%M:%S"
+						time_diff = Time.now - start_time
+						time_diff_hour = Time.at(time_diff.to_i.abs).utc.strftime "day:%d %H:%M:%S"
+						final_time_format = Time.at((ids.size*time_diff.to_i/(index+1)+start_time.to_i.abs).to_i.abs-utc_jp).utc.strftime "%d/%m/%Y %H:%M:%S"
+						# velocidade index por seg
+						puts "\n [ID #{id} : #{index+1}/#{ids.size} #{((index+1)/ids.size.to_f*100).round 2}% (#{start_time_format} - #{time_diff_hour} - #{final_time_format})] " 
+					end
+					c = Curriculum.find(id)
+					if c.xml.nil?
+						print " n "
+						next
+					else
+						if c.xml.include? "<ERRO><MENSAGEM>Erro ao recuperar o XML</MENSAGEM></ERRO>" # 57B
+							print " e "
+							next 
+						end
+						xmldoc = Nokogiri::XML(c.xml)
+						knowledges = []
+						knowledges_tag = xmldoc.xpath("//AREA-DE-ATUACAO")
+						next if knowledges_tag == []
+						knowledges_tag.each{|f|
+							knowledge = {}
+							knowledge[:major_subject] = extract_node_data(f, "@NOME-GRANDE-AREA-DO-CONHECIMENTO")
+							knowledge[:subject] = extract_node_data(f, "@NOME-DA-AREA-DO-CONHECIMENTO")
+							knowledge[:subsection] = extract_node_data(f, "@NOME-DA-SUB-AREA-DO-CONHECIMENTO")
+							knowledge[:specialty] = extract_node_data(f, "@NOME-DA-ESPECIALIDADE")
+							knowledges << knowledge
+						}
+						knowledges.each{|knowledge|	
+							k = Knowledge.find_or_create_by(
+								major_subject: format(knowledge[:major_subject]),
+								major_subject: format(knowledge[:major_subject]),
+								subject: format(knowledge[:subject]),
+								subsection: format(knowledge[:subsection]),
+								specialty: format(knowledge[:specialty])
+							)
+							# debugger
+							if !c.knowledges.exists?(k)
+								c.knowledges << k
+								# debugger
+								print " . "
+								c.save
+							else
+								print " ! "
+							end
+						}
+						c = nil
+						GC.start if id%10000 == 0
+					end
+				rescue
+					puts $!, $@
+				end
+			end
+		}
+		lattesPool.shutdown
+		
 
-	def process_xml_size
 	end
 
-	def process_last_degree
-		ids = Curriculum.where("degree IS NULL").pluck(:id).sort
-		puts '>>ids'
-		lattesPool = Thread.pool(50)
-		ids.each{|id|
+	def process_orientation
+		# ids = Curriculum.where("orientation IS NULL").pluck(:id).sort{|x, y| y <=> x}
+		ids = Curriculum.pluck(:id).sort
+		puts ">>ids - #{ids.size}"
+		lattesPool = Thread.pool(40)
+		ids.each_with_index{|id, index|
 			lattesPool.process do
-				print " [#{id}-#{(id/ids.size.to_f*100).round 2}%] " if id%150 == 0
-				c = Curriculum.find(id)
-				if c.xml.nil?
-					next
-				else
-					next if c.xml.include? "<ERRO><MENSAGEM>Erro ao recuperar o XML</MENSAGEM></ERRO>"
-					xmldoc = Nokogiri::XML(c.xml)
-					degrees = []
-					xmldoc.xpath("//FORMACAO-ACADEMICA-TITULACAO").children.each{|d|
-						degrees.append(d.name)
-					}
-					c.degree = degrees.join(', ')
+				begin
+					puts "\n [ID #{id} : #{index}/#{ids.size} #{(index/ids.size.to_f*100).round 2}%] " if index%50 == 0
+					c = Curriculum.find(id)
+					if c.xml.nil?
+						print " n "
+						next
+					else
+						if c.xml.include? "<ERRO><MENSAGEM>Erro ao recuperar o XML</MENSAGEM></ERRO>" # 57B
+							print " e "
+							next 
+						end
+						xmldoc = Nokogiri::XML(c.xml)
+						orientation = []
+						{
+							'ORIENTACOES-CONCLUIDAS-PARA-MESTRADO' => 'mestrado',
+							'ORIENTACOES-CONCLUIDAS-PARA-DOUTORADO' => 'doutorado',
+							'ORIENTACOES-CONCLUIDAS-PARA-POS-DOUTORADO' => 'pos-doutorado',
+							'OUTRAS-ORIENTACOES-CONCLUIDAS' => 'outras',
+							'ORIENTACAO-EM-ANDAMENTO-DE-MESTRADO' => 'mestrado em andamento',
+							'ORIENTACAO-EM-ANDAMENTO-DE-DOUTORADO' => 'doutorado em andamento',
+							'ORIENTACAO-EM-ANDAMENTO-DE-POS-DOUTORADO' => 'pos-doutorado em andamento',
+							'ORIENTACAO-EM-ANDAMENTO-DE-APERFEICOAMENTO-ESPECIALIZACAO' => 'aperf/especia em andamento',
+							'ORIENTACAO-EM-ANDAMENTO-DE-GRADUACAO' => 'graduacao em andamento',
+							'ORIENTACAO-EM-ANDAMENTO-DE-INICIACAO-CIENTIFICA' => 'iniciacao em andamento',
+							'OUTRAS-ORIENTACOES-EM-ANDAMENTO' => 'outras em andamento'
+						}.each{|kind, value|
+							element = xmldoc.xpath("//#{kind}")
+							next if element.nil? || element.length == 0
+							orientation.append("#{value} (#{element.length})")
+						}
+						# debugger
+						content = orientation.join(', ')
+						if content != c.orientation
+							c.orientation = content
+							print " . "
+							c.save
+							c = nil
+							GC.start if id%10000 == 0
+						else
+							print " ! "
+							c = nil
+							GC.start if id%10000 == 0
+							next
+						end
+					end
+				rescue
+					puts $!, $@
 				end
-				c.save
-				c = nil
-				GC.start if id%10000 == 0
 			end
 		}
 		lattesPool.shutdown
 	end
 
-	def process_count_xml
+	def process_degree
+		ids = Curriculum.where("degree IS NULL").pluck(:id).sort{|x, y| y <=> x}
+		# ids = Curriculum.pluck(:id).sort{|x, y| y <=> x}
+		puts ">>ids - #{ids.size}"
+		lattesPool = Thread.pool(40)
+		ids.each_with_index{|id, index|
+			lattesPool.process do
+				begin
+					puts "\n [ID #{id} : #{index}/#{ids.size} #{(index/ids.size.to_f*100).round 2}%] " if index%50 == 0
+					c = Curriculum.find(id)
+					if c.xml.nil?
+						print " n "
+						next
+					else
+						if c.xml.include? "<ERRO><MENSAGEM>Erro ao recuperar o XML</MENSAGEM></ERRO>" # 57B
+							print " e "
+							next 
+						end
+						xmldoc = Nokogiri::XML(c.xml)
+						degrees = []
+						xmldoc.xpath("//FORMACAO-ACADEMICA-TITULACAO").children.each{|d|
+							# debugger
+							if d.at_xpath("@STATUS-DO-CURSO") != nil
+								next if d.at_xpath("@STATUS-DO-CURSO").value != "CONCLUIDO"
+							end
+							degrees.append(d.name.downcase)
+						}
+						r = {}; degrees.uniq.each{|word| r[word]=degrees.count(word) }
+						r = r.sort_by {|k,v| v}.reverse
+						content = []
+						r.each{|k, v|
+							content.append("#{k} (#{v})")
+						}
+						content = content.join(', ')
+						# puts "\n"+content
+						if content != c.degree
+							c.degree = content
+							print " . "
+							c.save
+							c = nil
+							GC.start if id%10000 == 0
+						else
+							print " ! "
+							c = nil
+							GC.start if id%10000 == 0
+							next
+						end
+					end
+				rescue
+					puts $!, $@
+				end	
+			end
+		}
+		
+		lattesPool.shutdown
+	end
+
+	def process_xml_size
 		ids = Curriculum.where("xml_size IS NULL").pluck(:id).sort
 		puts '>>ids'
-		lattesPool = Thread.pool(50)
-		ids.each{|id|
+		lattesPool = Thread.pool(30)
+		ids.each_with_index{|id, index|
 			lattesPool.process do
-				print " [#{id}-#{(id/ids.size.to_f*100).round 2}%] " if id%150 == 0
+				print " [#{id}-#{(index/ids.size.to_f*100).round 2}%] " if index%150 == 0
 				c = Curriculum.find(id)
 				if c.xml.nil?
 					c.xml_size = 0
@@ -652,13 +822,13 @@ module ApplicationHelper
 				end
 				c.save
 				c = nil
-				GC.start if id%10000 == 0
-				# xml.include? "<ERRO><MENSAGEM>Erro ao recuperar o XML</MENSAGEM></ERRO>"
+				GC.start if id%1000 == 0
 			end
 		}
 		lattesPool.shutdown
 	end
 
+	# TODO
 	def process_location_degree
 	end
 

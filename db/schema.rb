@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20141127180538) do
+ActiveRecord::Schema.define(version: 20141203210736) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -30,14 +30,25 @@ ActiveRecord::Schema.define(version: 20141127180538) do
     t.string   "id10"
     t.date     "lattes_updated_at"
     t.string   "scholarship"
-    t.string   "degree"
+    t.string   "degree",            limit: 3000
     t.xml      "xml"
     t.datetime "created_at"
     t.datetime "updated_at"
     t.integer  "xml_size"
+    t.string   "orientation",       limit: 2000
   end
 
   add_index "curriculums", ["id10"], name: "index_curriculums_on_id10", unique: true, using: :btree
+
+  create_table "curriculums_knowledges", id: false, force: true do |t|
+    t.integer "curriculum_id", null: false
+    t.integer "knowledge_id",  null: false
+  end
+
+  create_table "curriculums_knowlegdes", id: false, force: true do |t|
+    t.integer "curriculum_id", null: false
+    t.integer "knowlegde_id",  null: false
+  end
 
   create_table "degrees", force: true do |t|
     t.string   "name"
