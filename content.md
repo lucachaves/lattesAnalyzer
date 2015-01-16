@@ -1,4 +1,4 @@
-##VIEW
+#VIEW
 
 * http://www.visualisingdata.com/
 * http://www.visualisingdata.com/index.php/resources/
@@ -6,12 +6,12 @@
 * http://www.visualizing.org/
 * (Beautiful Visualization Book)[http://it-ebooks.info/book/283/)
 
-word frequency analyze
+###word frequency analyze
 
 * http://www.tapor.ca/
 
 
-Dica para percusos no mapa
+###Dica para percusos no mapa
 
 * air traffic routes
 * flight path
@@ -21,7 +21,7 @@ Dica para percusos no mapa
 * Direct Flight Routes
 * traffic flow
 
-Flight Patterns
+###Flight Patterns
 
 * http://www.aaronkoblin.com/work/flightpatterns/
 * http://www.ted.com/talks/aaron_koblin?language=en
@@ -38,7 +38,7 @@ Publicado na Nature
 http://www.nytimes.com/interactive/2012/11/11/sunday-review/counties-moving.html?_r=1&
 
 
-###API Mapa
+##API Mapa
 
 * http://nominatim.openstreetmap.org/
 * http://wiki.openstreetmap.org/wiki/Main_Page
@@ -53,7 +53,7 @@ http://www.nytimes.com/interactive/2012/11/11/sunday-review/counties-moving.html
 * http://www.gisgraphy.com/
 
 
-google maps: density points or heatmap 
+###google maps: density points or heatmap 
 * https://developers.google.com/api-client-library/ruby/start/get_started
 * https://developers.google.com/maps/documentation/geocoding/
 * https://developers.google.com/places/documentation/supported_types
@@ -66,7 +66,7 @@ google maps: density points or heatmap
 * http://www.morethanamap.com/
 * http://www.morethanamap.com/demos/visualization/flights
 
-D3
+###D3
 * http://ramblings.mcpher.com/Home/excelquirks/d3/flights
 * http://xliberation.com/googlecharts/d3flights.html
 * http://mbostock.github.io/d3/talk/20111116/airports.html
@@ -76,31 +76,31 @@ D3
 * http://techslides.com/demos/d3/direct-flights.html
 * http://www.tnoda.com/blog/2014-04-02
 
-Mapbox
+###Mapbox
 * https://www.mapbox.com/developers/api/geocoding/
 * https://www.mapbox.com/mapbox-studio/#darwin
 * https://www.mapbox.com/mapbox.js/example/v1.0.0/
 * https://www.mapbox.com/mapbox.js/example/v1.0.0/animating-flight-paths/
 
-CartoDB
+###CartoDB
 * http://cartodb.com/tour/
 * https://lucachaves.cartodb.com/
 
-Mapbox vs CartoDB
+###Mapbox vs CartoDB
 * http://www.phase2technology.com/blog/open-source-tool-sets-for-creating-high-density-maps/
 
-Leaflet
+###Leaflet
 * http://leafletjs.com/
 * https://www.mapbox.com/mapbox.js/example/v1.0.0/plain-leaflet/
 
-tableau
+###tableau
 * http://kb.tableausoftware.com/articles/knowledgebase/using-path-shelf-pattern-analysis
 * http://www.tableausoftware.com/support/manuals/quickstart
 * http://community.tableausoftware.com/message/123829
 * http://sciolisticramblings.wordpress.com/2013/11/15/flights-of-fancy/
 * http://public.tableausoftware.com/download/workbooks/OpenFlightsDataExplorer?format=html
 
-OPEN FLIGHTS
+###OPEN FLIGHTS
 * http://openflights.org/data.html
 * http://planefinder.net/
 * http://www.visualisingdata.com/index.php/2012/02/bio-diaspora-visualising-interactions-between-populations-and-travel/
@@ -112,21 +112,22 @@ OPEN FLIGHTS
 * http://rackpull.com/web-development/scrolling-map-animation/
 * http://www.amcharts.com/demos/flight-routes-map/
 
-
-
-###RUBY MAPA
+##RUBY MAPA
 https://www.ruby-toolbox.com/categories/geocoding___maps
 
-geocoder
+###geocoder
 * http://www.rahuljiresal.com/2014/02/reverse-geocode-coordinates-in-ruby/
 * http://www.bing.com/maps/?FORM=Z9LH3
 * http://www.openstreetmap.org/
 
-geokit
+###geokit
 * https://github.com/geokit/geokit
 
-###EXIBIR INFO LOCATION
+###CODE
 
+####EXIBIR INFO LOCATION
+
+```
   Location.offset(4999).limit(1000).each{|l|
   Location.where(latitude:nil).each{|l|
     # if(l.address != '' && l.city != nil && l.country != nil)
@@ -136,9 +137,11 @@ geokit
       l.save
     # end
   }
+```
 
-###EXIBIR UNIVERSITY COM LOCATION
+####EXIBIR UNIVERSITY COM LOCATION
 
+```
   locations = University.find_by_sql("SELECT universities.name FROM public.universities, public.locations WHERE universities.location_id = locations.id AND locations.country = '' AND locations.city = ''").map{|u|
 
   locations = University.find_by_sql("SELECT universities.name FROM public.universities, public.locations WHERE universities.location_id = locations.id AND locations.latitude IS NULL AND locations.longitude IS NULL")[0..100].map{|u|
@@ -154,9 +157,10 @@ geokit
     end
   }
   puts JSON.pretty_generate locations
+```
 
-###CONSULTAR LOCATION DE UNIVERSITY ATRAVÉS DO Geocoder
-
+####CONSULTAR LOCATION DE UNIVERSITY ATRAVÉS DO Geocoder
+```
   #1
   locations = Person.all[0..20].map{|p|
     p.degrees.map{|d|
@@ -192,18 +196,24 @@ geokit
       nil
   }
   puts JSON.pretty_generate locations
+```
 
-###EXIBIR NASCIMENTO
+####EXIBIR NASCIMENTO
 
+```
   locations = Person.all[0..-1].map{|p|
     next if p.born.nil?
     l = p.born
     l.address
   }
   puts JSON.pretty_generate locations
+```
 
-###INDEX KNOWLEDGE
-  
+#CRAWLER
+
+##INDEX KNOWLEDGE
+
+```  
   [ID 896001 : 896000/3911585 22.91% (04/12/2014 02:25:06 - day:01 11:06:03 - 06/12/2014 02:52:48)] 
   [ID 1069701 : 166201/3008085 5.53% (04/12/2014 11:00:32 - day:01 04:27:39 - 07/12/2014 19:44:45)]
   [ID 1368501 : 298801/2841885 10.51% (04/12/2014 22:53:44 - day:01 07:57:57 - 08/12/2014 02:39:29)] 
@@ -211,14 +221,17 @@ geokit
   [ID 2203600 : 591601/2299586 25.73% (06/12/2014 12:01:13 - day:02 10:45:33 - 12/12/2014 03:07:51)] 
   [ID 2203600 : 591601/2299586 25.73% (06/12/2014 12:01:13 - day:02 10:45:33 - 12/12/2014 03:07:51)] 
   [ID 2320600 : 117001/1707986 6.85% (09/12/2014 23:45:43 - day:01 09:10:49 - 15/12/2014 13:46:33)]
+```
+
+##FUNCIONALIDADES
 
 ###Sending logs to Graylog2 server
-https://www.ruby-toolbox.com/categories/Log_Analysis
-https://github.com/Graylog2/gelf-rb
-http://www.graylog2.org/resources/documentation/sending/rails
-http://logstash.net/docs/1.4.2/tutorials/getting-started-with-logstash
-https://github.com/garethr/graylogtail
-https://scoutapp.com/plugin_urls
+* https://www.ruby-toolbox.com/categories/Log_Analysis
+* https://github.com/Graylog2/gelf-rb
+* http://www.graylog2.org/resources/documentation/sending/rails
+* http://logstash.net/docs/1.4.2/tutorials/getting-started-with-logstash
+* https://github.com/garethr/graylogtail
+* https://scoutapp.com/plugin_urls
 
 ###Tempfile & Mechanize
 * http://stackoverflow.com/questions/3316043/how-do-i-download-a-remote-image-from-another-site-to-a-file-column-in-ruby-on-r
@@ -228,47 +241,54 @@ https://scoutapp.com/plugin_urls
 * http://www.markhneedham.com/blog/2008/10/02/ruby-unzipping-a-file-using-rubyzip/
 
 ###RTESSERACT & RMAGICK
-https://github.com/dannnylo/rtesseract
-https://github.com/gemhome/rmagick
-http://superuser.com/questions/361435/i-have-compiled-imagemagick-on-my-centos-and-rmagick-wont-install
+* https://github.com/dannnylo/rtesseract
+* https://github.com/gemhome/rmagick
+* http://superuser.com/questions/361435/i-have-compiled-imagemagick-on-my-centos-and-rmagick-wont-install
 
+```
 brew install imagemagick --disable-openmp
 #tesseract
 sudo PKG_CONFIG_PATH=/usr/local/Cellar/imagemagick/6.8.9-7/lib/pkgconfig gem install rmagick -V
+```
 
 ###NOKOGIRI
-https://github.com/sparklemotion/nokogiri/wiki/Cheat-sheet
-https://gist.github.com/rstacruz/1569572
-http://blog.ubiquo.me/now-on-edge-easier-relations-in-scaffold-gene/
+* https://github.com/sparklemotion/nokogiri/wiki/Cheat-sheet
+* https://gist.github.com/rstacruz/1569572
+* http://blog.ubiquo.me/now-on-edge-easier-relations-in-scaffold-gene/
 
+```
 xmldoc = Nokogiri::XML(File.read('app/helpers/lattes/0005349558315095.xml'))
 xmldoc.xpath("//FORMACAO-ACADEMICA-TITULACAO").children
+```
 
 ###SINGLETON
-http://www.ruby-doc.org/stdlib-1.9.3/libdoc/singleton/rdoc/Singleton.html
-
+* http://www.ruby-doc.org/stdlib-1.9.3/libdoc/singleton/rdoc/Singleton.html
 
 ###SocketError
-http://stackoverflow.com/questions/12358682/rails-post-socketerror-getaddrinfo-temporary-failure-in-name-resolution-on
+* http://stackoverflow.com/questions/12358682/rails-post-socketerror-getaddrinfo-temporary-failure-in-name-resolution-on
 
 ###Concurrency and Database Connections in RoR
-Multiple Connection
-FATAL: sorry, too many clients already
-https://devcenter.heroku.com/articles/concurrency-and-database-connections
-http://stackoverflow.com/questions/15086880/correct-setting-of-database-connection-pool-database-yml-for-single-threaded-rai
+* Multiple Connection
+* FATAL: sorry, too many clients already
+* https://devcenter.heroku.com/articles/concurrency-and-database-connections
+* http://stackoverflow.com/questions/15086880/correct-setting-of-database-connection-pool-database-yml-for-single-threaded-rai
 
 ###Multiple Database
-http://stackoverflow.com/questions/17311199/connecting-to-multiple-databases-in-ruby-on-rails
+* http://stackoverflow.com/questions/17311199/connecting-to-multiple-databases-in-ruby-on-rails
+
+```
 def connection
   ActiveRecord::Base.establish_connection("#{Rails.env}_sec".to_sym).connection
 end
 establish_connection "#{Rails.env}_sec".to_sym
 rake db:migrate:redo VERSION=version
+```
 
 ###rails find_or_create_by case insensitive
 
 ###GENERATOR
 
+```
   rails generate model person id16:primary_key name:string lattes_updated_at:date location:references knowlegde:references --no-id
 
   rails generate model curriculum id16:string id10:string:uniq lattes_updated_at:date scholarship:string degree:string{2000} xml:xml xml_length:integer orientation:string{2000}
@@ -307,9 +327,9 @@ rake db:migrate:redo VERSION=version
   Degree.destroy_all
   Course.destroy_all
 
-  How to restart id counting on a table in PostgreSQL after deleting some previous data
-  ALTER SEQUENCE seq RESTART WITH 1;
-  UPDATE t SET idcolumn=nextval('seq');
+  #How to restart id counting on a table in PostgreSQL after deleting some previous data
+  #ALTER SEQUENCE seq RESTART WITH 1;
+  #UPDATE t SET idcolumn=nextval('seq');
   ActiveRecord::Base.connection.reset_pk_sequence!('updates')
   ActiveRecord::Base.connection.reset_pk_sequence!('work')
   ActiveRecord::Base.connection.reset_pk_sequence!('universities')
@@ -321,10 +341,11 @@ rake db:migrate:redo VERSION=version
   ActiveRecord::Base.connection.reset_pk_sequence!('courses')
 
   rake db:reset
+```
 
 
 ###GENERATE DATA
-
+```
   #1
   l = Location.create city: 'jp', uf: 'pb', country: 'pb'
   l.universities.create :name => 'UFPB'
@@ -365,26 +386,28 @@ rake db:migrate:redo VERSION=version
   Degree.all.each{|d| puts d.course.university.name}
   Degree.all.each{|d| puts ">>> #{d.name} #{d.course.name} #{d.course.university.name} #{d.course.university.location.country}"}
   Location.all.each{|l| puts " #{l.city} #{l.uf} #{l.country}" }
+```
 
-##LATTES 
-http://www.cnpq.br/web/guest/geral
-http://lattes.cnpq.br/
-http://www.cnpq.br/web/portal-lattes/outras-bases
-http://www.cnpq.br/web/portal-lattes/dados-e-estatisticas
-http://lmpl.cnpq.br/lmpl/
+#LATTES 
+
+* http://www.cnpq.br/web/guest/geral
+* http://lattes.cnpq.br/
+* http://www.cnpq.br/web/portal-lattes/outras-bases
+* http://www.cnpq.br/web/portal-lattes/dados-e-estatisticas
+* http://lmpl.cnpq.br/lmpl/
 
 
-###FILTROS DO BUSCATEXTUAL
+##FILTROS DO BUSCATEXTUAL
+* Total 3900735 (10/2014)
+* PQ 14339 (1[ABCD], 2)
+* Outras Bolsas
+* D 201984
+* M 394958
+* E 733707
+* G 2005267
+* D+G+M+G 3335916 (Resta 564819 Técn, Granduando, EM)
   
-  Total 3900735 (10/2014)
-  PQ 14339 (1[ABCD], 2)
-  Outras Bolsas
-  D 201984
-  M 394958
-  E 733707
-  G 2005267
-  D+G+M+G 3335916 (Resta 564819 Técn, Granduando, EM)
-  
+```
   idx_particao:0 #outros
   idx_particao:1 #doutores
   idx_nacionalidade:e
@@ -402,18 +425,20 @@ http://lmpl.cnpq.br/lmpl/
   idx_modalidade_bolsa:2
   idx_modalidade_bolsa:(pq) #produtividade
   idx_modalidade_bolsa:gm # mestrado
+```
+  
+###todos
+* url = "http://buscatextual.cnpq.br/buscatextual/busca.do?metodo=forwardPaginaResultados&registros=0;100&query=( +idx_nacionalidade:e) or ( +idx_nacionalidade:b)&analise=cv"
 
-  # todos
-  url = "http://buscatextual.cnpq.br/buscatextual/busca.do?metodo=forwardPaginaResultados&registros=0;100&query=( +idx_nacionalidade:e) or ( +idx_nacionalidade:b)&analise=cv"
-  # pq
-  url = "http://buscatextual.cnpq.br/buscatextual/busca.do?metodo=forwardPaginaResultados&registros=0;10&query=( +( idx_modalidade_bolsa:1a idx_modalidade_bolsa:1b idx_modalidade_bolsa:1c idx_modalidade_bolsa:1d idx_modalidade_bolsa:2) +idx_modalidade_bolsa:(pq)  +idx_nacionalidade:e) or ( +( idx_modalidade_bolsa:1a idx_modalidade_bolsa:1b idx_modalidade_bolsa:1c idx_modalidade_bolsa:1d idx_modalidade_bolsa:2) +idx_modalidade_bolsa:(pq)  +idx_nacionalidade:b)&analise=cv"
+###pq
+* url = "http://buscatextual.cnpq.br/buscatextual/busca.do?metodo=forwardPaginaResultados&registros=0;10&query=( +( idx_modalidade_bolsa:1a idx_modalidade_bolsa:1b idx_modalidade_bolsa:1c idx_modalidade_bolsa:1d idx_modalidade_bolsa:2) +idx_modalidade_bolsa:(pq)  +idx_nacionalidade:e) or ( +( idx_modalidade_bolsa:1a idx_modalidade_bolsa:1b idx_modalidade_bolsa:1c idx_modalidade_bolsa:1d idx_modalidade_bolsa:2) +idx_modalidade_bolsa:(pq)  +idx_nacionalidade:b)&analise=cv"
 
 
-###XML LATTES
-DTD LATTES 
-http://www.cnpq.br/documents/313759/b6f13489-2166-4cb4-8be5-8ab3fb5ab106
-http://lmpl.cnpq.br/lmpl/index.jsp
+###XML & DTD LATTES
+* http://www.cnpq.br/documents/313759/b6f13489-2166-4cb4-8be5-8ab3fb5ab106
+* http://lmpl.cnpq.br/lmpl/index.jsp
 
+```
 ORIENTACOES
 //ORIENTACOES-CONCLUIDAS/ORIENTACOES-CONCLUIDAS-PARA-MESTRADO
 DADOS-BASICOS-DE-ORIENTACOES-CONCLUIDAS-PARA-MESTRADO
@@ -480,48 +505,74 @@ AREAS-DO-CONHECIMENTO
 
 <!ATTLIST DADOS-BASICOS-DE-OUTRAS-ORIENTACOES-EM-ANDAMENTO
   NATUREZA CDATA  #IMPLIED>
+```
 
+#WEB SEMANTICA
+##DBPEDIA
 
-###DBPEDIA
-
-http://dbpedia.org/page/Federal_University_of_Para%C3%ADba
-http://dbpedia.org/sparql
+* http://dbpedia.org/page/Federal_University_of_Para%C3%ADba
+* http://dbpedia.org/sparql
+```
 select * where {
 ?subject rdf:type <http://schema.org/CollegeOrUniversity>.
 ?subject rdfs:label ?label.
 ?subject 
 FILTER (lang(?label) = "en")
 } LIMIT 100
+```
 
-###FREEBASE
-https://www.freebase.com/
-MQL
-http://mql.freebaseapps.com/index
+##FREEBASE
+* https://www.freebase.com/
+* https://www.freebase.com/query
+* http://www.freebase.com/explore
+* https://developers.google.com/freebase/
+* https://developers.google.com/freebase/v1/getting-started
+* https://github.com/PerfectMemory/freebase-api
 
-https://www.googleapis.com/freebase/v1/search?indent=true&query=Kingston+University&filter=(all type:/education/university )
-https://www.googleapis.com/freebase/v1/search?indent=true&query=john&filter=(all type:/people/person /people/person/nationality:"Canada")
+###Topic, RDF
+* /type/domain > /type/object/type > /common/topic
+* http://wiki.freebase.com/wiki/Topic
+* http://wiki.freebase.com/wiki/Types
+* http://wiki.freebase.com/wiki/Domain
+* http://wiki.freebase.com/wiki/Object
+* https://www.googleapis.com/freebase/v1/topic/en/london
+* https://www.googleapis.com/freebase/v1/rdf/en/london
 
-https://www.freebase.com/education
-https://www.freebase.com/education?schema=
-https://www.freebase.com/education/university
-https://www.freebase.com/education/university?schema=
-http://www.freebase.com/education/university?instances=
+###MQL
+* http://mql.freebaseapps.com/index
 
-https://www.freebase.com/organization/organization/headquarters?schema=
+###SEARCH
+* https://www.googleapis.com/freebase/v1/mqlread?query={"id": null,"mid": "/m/04jpl","name": "London"}
+* https://www.freebase.com/search?query=Università di Pavia&lang=en&scoring=entity&prefixed=true&any=/common/topic
+* https://www.googleapis.com/freebase/v1/search?query=Università di Pavia&indent=true&lang=en&scoring=entity&prefixed=true&any=/common/topic
+* https://www.googleapis.com/freebase/v1/search?query=Università di Pavia&indent=true&any=/common/topic&limit=1
+* https://www.googleapis.com/freebase/v1/search?indent=true&query=london
+* https://www.googleapis.com/freebase/v1/search?indent=true&filter=(any type:/people/person)
+* https://www.googleapis.com/freebase/v1/search?indent=true&query=Kingston+University&filter=(all type:/education/university )
+* https://www.googleapis.com/freebase/v1/search?indent=true&query=john&filter=(all type:/people/person /people/person/nationality:"Canada")
 
-https://www.freebase.com/location
-https://www.freebase.com/location?schema=
-https://www.freebase.com/location?instances=
-https://www.freebase.com/location/geocode?schema=
-https://www.freebase.com/location/citytown?schema=
-https://www.freebase.com/location/citytown?instances=
-https://www.freebase.com/location/mailing_address?schema=
-https://www.freebase.com/location/country?schema=
-http://www.freebase.com/location/country?instances=
-http://www.freebase.com/location/country?i18n=
-http://www.freebase.com/location/country?props=
-http://www.freebase.com/location/country?keys=
-http://www.freebase.com/location/country?links=
+###EXEMPLOS
+* https://www.freebase.com/education
+* https://www.freebase.com/education?schema=
+* https://www.freebase.com/education/university
+* https://www.freebase.com/education/university?schema=
+* http://www.freebase.com/education/university?instances=
+* https://www.freebase.com/organization/organization/headquarters?schema=
+* https://www.freebase.com/location
+* https://www.freebase.com/location?schema=
+* https://www.freebase.com/location?instances=
+* https://www.freebase.com/location/geocode?schema=
+* https://www.freebase.com/location/citytown?schema=
+* https://www.freebase.com/location/citytown?instances=
+* https://www.freebase.com/location/mailing_address?schema=
+* https://www.freebase.com/location/country?schema=
+* http://www.freebase.com/location/country?instances=
+* http://www.freebase.com/location/country?i18n=
+* http://www.freebase.com/location/country?props=
+* http://www.freebase.com/location/country?keys=
+* http://www.freebase.com/location/country?links=
+
+```
 '{"id":"/en/china","capital":null,"type":"/location/country"}'
 
 http://www.freebase.com/m/05v33x
@@ -551,13 +602,11 @@ ns:type.object.type    ns:location.country;
 01hdp5
 ns:type.object.type    ns:location.administrative_division;
 
-
-
 ns:rdf:type    ns:education.university;
 ns:type.object.name    null;
 ns:organization.organization.headquarters    null;
 
-
+#MQL
 [{
   "id": null,
   "mid": null,
@@ -596,27 +645,48 @@ ns:organization.organization.headquarters    null;
   }]
 }]
 
-https://github.com/PerfectMemory/freebase-api
-https://www.freebase.com/query
-http://www.freebase.com/explore
-https://developers.google.com/freebase/
-Topic, RDF, MQL, Search
-http://wiki.freebase.com/wiki/Topic
-http://wiki.freebase.com/wiki/Types
-http://wiki.freebase.com/wiki/Domain
-http://wiki.freebase.com/wiki/Object
-/type/domain > /type/object/type > /common/topic
-https://developers.google.com/freebase/v1/getting-started
-https://www.freebase.com/search?query=Università di Pavia&lang=en&scoring=entity&prefixed=true&any=/common/topic
-https://www.googleapis.com/freebase/v1/search?query=Università di Pavia&indent=true&lang=en&scoring=entity&prefixed=true&any=/common/topic
-https://www.googleapis.com/freebase/v1/search?query=Università di Pavia&indent=true&any=/common/topic&limit=1
-https://www.googleapis.com/freebase/v1/search?indent=true&query=london
-https://www.googleapis.com/freebase/v1/search?indent=true&filter=(any type:/people/person)
-https://www.googleapis.com/freebase/v1/mqlread?query={"id": null,"mid": "/m/04jpl","name": "London"}
-https://www.googleapis.com/freebase/v1/topic/en/london
-https://www.googleapis.com/freebase/v1/rdf/en/london
+[{
+  "mid": null,
+  "name": null,
+  "name~=": "Kingston University",
+  "type": "/education/university",
+  "/organization/organization/headquarters":[{
+    "/location/mailing_address/citytown": [{
+      "name": null,
+      "/location/location/containedby": [{
+        "type": "/location/administrative_division",
+        "name": null,
+        "mid": null,
+        
+      }],
+    }]
+  }]
+}]
 
-MQL
+[{
+  "id": null,
+  "name": null,
+  "name~=": "Tunas",
+  "type": "/education/university",
+  "/organization/organization/headquarters": [{
+    "/location/mailing_address/citytown": [{
+      "name": null,
+      "mid": null,
+      "id": null,
+      "/location/location/geolocation": [{
+        "mid": null,
+        "/location/geocode/latitude": null,
+        "/location/geocode/longitude": null
+      }]
+    }],
+    "/location/mailing_address/country": [{
+      "name": null,
+      "mid": null
+    }]
+  }]
+}]
+
+#MQL RUBY
 
 FreebaseAPI.session.mqlread({
   :type => '/internet/website',
@@ -740,77 +810,36 @@ x.map{|y|
   ]
 }
 
+```
 
-[{
-  "mid": null,
-  "name": null,
-  "name~=": "Kingston University",
-  "type": "/education/university",
-  "/organization/organization/headquarters":[{
-    "/location/mailing_address/citytown": [{
-      "name": null,
-      "/location/location/containedby": [{
-        "type": "/location/administrative_division",
-        "name": null,
-        "mid": null,
-        
-      }],
-    }]
-  }]
-}]
+#XML to SQL Converter 
 
-[{
-  "id": null,
-  "name": null,
-  "name~=": "Tunas",
-  "type": "/education/university",
-  "/organization/organization/headquarters": [{
-    "/location/mailing_address/citytown": [{
-      "name": null,
-      "mid": null,
-      "id": null,
-      "/location/location/geolocation": [{
-        "mid": null,
-        "/location/geocode/latitude": null,
-        "/location/geocode/longitude": null
-      }]
-    }],
-    "/location/mailing_address/country": [{
-      "name": null,
-      "mid": null
-    }]
-  }]
-}]
+##[XML, DTD, XSL] -> [SQL, DB, CSV]
 
-
-
-###[XML, DTD, XSL] -> [SQL, DB, CSV]
-
-XML to SQL Converter
-
-HyperJAXB
-https://github.com/highsource/hyperjaxb3/
-http://confluence.highsource.org/display/HJ3/Documentation
-http://grepcode.com/file/repo1.maven.org/maven2/org.jvnet.hyperjaxb3/hyperjaxb3-ejb-roundtrip/0.5.6/org/jvnet/hyperjaxb3/ejb/test/
-http://confluence.highsource.org/display/HJ3/Documentation
-http://confluence.highsource.org/display/HJ3/Home
-http://confluence.highsource.org/display/HJ3/Downloads
-http://confluence.highsource.org/display/HJ3/Purchase+Order+Tutorial
-http://confluence.highsource.org/display/HJ3/Generating+persistence+unit+descriptor
-http://confluence.highsource.org/display/HJ3/Customization+Guide
-http://confluence.highsource.org/display/HJ3/Hibernate
-https://java.net/projects/hyperjaxb
-https://java.net/projects/hyperjaxb2
-https://java.net/projects/hyperjaxb3
-https://github.com/claudemamo/hyperjaxb3-example
-http://xircles.codehaus.org/projects/hyperjaxb3
-https://wikis.oracle.com/display/GlassFish/Hyperjaxb3Usage
-http://gerardnico.com/wiki/language/java/hyperjaxb
-https://benwilcock.wordpress.com/tag/hyperjaxb3/
-http://yaug.org/content/persistence-hyperjaxb3-framework
-http://opensourcesoftwareandme.blogspot.com.br/2012/11/a-practical-solution-for-xml-to.html
-http://www.scribd.com/doc/3031341/HyperJaxb2
-https://answersresource.wordpress.com/2014/10/14/no-persistence-provider-for-entitymanager-named-persistence-xml/
+###HyperJAXB
+* https://github.com/highsource/hyperjaxb3/
+* http://confluence.highsource.org/display/HJ3/Documentation
+* http://grepcode.com/file/repo1.maven.org/maven2/org.jvnet.hyperjaxb3/hyperjaxb3-ejb-roundtrip/0.5.6/org/jvnet/hyperjaxb3/ejb/test/
+* http://confluence.highsource.org/display/HJ3/Documentation
+* http://confluence.highsource.org/display/HJ3/Home
+* http://confluence.highsource.org/display/HJ3/Downloads
+* http://confluence.highsource.org/display/HJ3/Purchase+Order+Tutorial
+* http://confluence.highsource.org/display/HJ3/Generating+persistence+unit+descriptor
+* http://confluence.highsource.org/display/HJ3/Customization+Guide
+* http://confluence.highsource.org/display/HJ3/Hibernate
+* https://java.net/projects/hyperjaxb
+* https://java.net/projects/hyperjaxb2
+* https://java.net/projects/hyperjaxb3
+* https://github.com/claudemamo/hyperjaxb3-example
+* http://xircles.codehaus.org/projects/hyperjaxb3
+* https://wikis.oracle.com/display/GlassFish/Hyperjaxb3Usage
+* http://gerardnico.com/wiki/language/java/hyperjaxb
+* https://benwilcock.wordpress.com/tag/hyperjaxb3/
+* http://yaug.org/content/persistence-hyperjaxb3-framework
+* http://opensourcesoftwareandme.blogspot.com.br/2012/11/a-practical-solution-for-xml-to.html
+* http://www.scribd.com/doc/3031341/HyperJaxb2
+* https://answersresource.wordpress.com/2014/10/14/no-persistence-provider-for-entitymanager-named-persistence-xml/
+```
 mvn clean install exec:java -Dexec.mainClass="main.java.Main"
 <dependency>
     <groupId>mysql</groupId>
@@ -818,6 +847,7 @@ mvn clean install exec:java -Dexec.mainClass="main.java.Main"
     <version>5.0.5</version>
     <scope>test</scope>
 </dependency>
+
 hibernate.dialect=org.hibernate.dialect.MySQLDialect
 hibernate.connection.driver_class=com.mysql.jdbc.Driver
 hibernate.connection.username=...
@@ -826,74 +856,64 @@ hibernate.connection.url=jdbc:mysql://localhost/hj3
 hibernate.hbm2ddl.auto=create-drop
 hibernate.cache.provider_class=org.hibernate.cache.HashtableCacheProvider
 hibernate.jdbc.batch_size=0
+```
+###jaxb to nosql
+* http://www.infoq.com/articles/MarkLogic-NoSQL-with-Transactions
 
-jaxb to nosql
-http://www.infoq.com/articles/MarkLogic-NoSQL-with-Transactions
+###OUTROS
+* http://xmlpipedb.cs.lmu.edu
+* http://sourceforge.net/projects/xmlpipedb/
+* http://xmlpipedb.cs.lmu.edu/download.shtml
+* http://xmlpipedb.cs.lmu.edu/docs/xmlpipedb-manual-20060731.pdf
+* http://xml2sql.sourceforge.net/
+* http://xmlpipedb.sourceforge.net/wiki/index.php/Using_XSD-to-DB
+* excel http://www.excel-easy.com/examples/xml.html
+* http://xmltodb.sourceforge.net/
+* http://sourceforge.net/projects/xmltodb/
+* http://xml2db.sourceforge.net
+* http://sourceforge.net/projects/xml2db/
+* http://xsd2db.sourceforge.net
+* http://sourceforge.net/projects/xsd2db/
+* https://code.google.com/p/xml2csv-conv/
+* https://github.com/knadh/xmlutils.py
+* http://sourceforge.net/projects/convertxmltocsv/
+* http://www.xsd2xml.com/
+* Advanced XML Converter 3.0 keygen
+* http://www.xml-converter.com/
+* http://www.imsoftly.com/index.php/products/easy-xml-converter
+* http://www.coolutils.com/XML-to-SQL-In-Batch
+* http://www.altova.com/xmlspy/database-xml.html
+* http://www.altova.com/mapforce.html
+* http://www.altova.com/xmlspy/database-xml.html
+* http://manual.altova.com/XMLSpy/spyenterprise/index.html?createdbstructurebasedonschema.htm
+* http://www.altova.com/download-convert-xml.html
+* http://www.stylusstudio.com/xsd-mapping.html
+* http://www.convertcsv.com/csv-to-xml.htm
+* http://www.luxonsoftware.com/converter/xmltocsv
+* http://xmlgrid.net/xml2text.html
+* https://github.com/philipmat/discogs-xml2db
+* http://cdn.ttgtmedia.com/searchDataManagement/downloads/DB2pureXML_ch11.pdf 
+* http://stackoverflow.com/questions/7941353/xml-dtd-sql-schema
+* http://search.cpan.org/dist/SGML-DTDParse/bin/dtdparse
+* http://search.cpan.org/~metzzo/XML-RDB/RDB.pm
 
-http://xmlpipedb.cs.lmu.edu
-http://sourceforge.net/projects/xmlpipedb/
-http://xmlpipedb.cs.lmu.edu/download.shtml
-http://xmlpipedb.cs.lmu.edu/docs/xmlpipedb-manual-20060731.pdf
-http://xml2sql.sourceforge.net/
-http://xmlpipedb.sourceforge.net/wiki/index.php/Using_XSD-to-DB
+###SAP, Pentaho
+* https://www.youtube.com/watch?v=T0L_antzD3c
 
-excel http://www.excel-easy.com/examples/xml.html
-http://xmltodb.sourceforge.net/
-http://sourceforge.net/projects/xmltodb/
-http://xml2db.sourceforge.net
-http://sourceforge.net/projects/xml2db/
-http://xsd2db.sourceforge.net
-http://sourceforge.net/projects/xsd2db/
-https://code.google.com/p/xml2csv-conv/
-https://github.com/knadh/xmlutils.py
-http://sourceforge.net/projects/convertxmltocsv/
-http://www.xsd2xml.com/
+###DATABASE XML
+* https://dev.mysql.com/doc/refman/5.5/en/load-xml.html
+* http://www.oracle.com/us/products/database/berkeley-db/xml/overview/index.html
+* http://docs.oracle.com/cd/B28359_01/appdev.111/b28419/d_xmlgen.htm#i1012053
+* http://exist-db.org/exist/apps/doc/
+* http://www.oracle.com/technetwork/database/database-technologies/berkeleydb/downloads/index.html?ssSourceSiteId=ocomen
+* http://www.di.unipi.it/~ghelli/didattica/bdldoc/B19306_01/appdev.102/b14259/xdb03usg.htm#CEGDFBAJ
+* XMLTYPE
+* XMLTABLE
 
-Advanced XML Converter 3.0 keygen
-
-http://www.xml-converter.com/
-http://www.imsoftly.com/index.php/products/easy-xml-converter
-http://www.coolutils.com/XML-to-SQL-In-Batch
-http://www.altova.com/xmlspy/database-xml.html
-http://www.altova.com/mapforce.html
-http://www.altova.com/xmlspy/database-xml.html
-http://manual.altova.com/XMLSpy/spyenterprise/index.html?createdbstructurebasedonschema.htm
-http://www.altova.com/download-convert-xml.html
-http://www.stylusstudio.com/xsd-mapping.html
-
-http://www.convertcsv.com/csv-to-xml.htm
-http://www.luxonsoftware.com/converter/xmltocsv
-http://xmlgrid.net/xml2text.html
-
-https://github.com/philipmat/discogs-xml2db
-
-
-SAP, Pentaho
-https://www.youtube.com/watch?v=T0L_antzD3c
-
-
-http://cdn.ttgtmedia.com/searchDataManagement/downloads/DB2pureXML_ch11.pdf 
-http://stackoverflow.com/questions/7941353/xml-dtd-sql-schema
-http://search.cpan.org/dist/SGML-DTDParse/bin/dtdparse
-http://search.cpan.org/~metzzo/XML-RDB/RDB.pm
-
-
-DATABASE XML
-https://dev.mysql.com/doc/refman/5.5/en/load-xml.html
-
-http://www.oracle.com/us/products/database/berkeley-db/xml/overview/index.html
-http://docs.oracle.com/cd/B28359_01/appdev.111/b28419/d_xmlgen.htm#i1012053
-http://exist-db.org/exist/apps/doc/
-http://www.oracle.com/technetwork/database/database-technologies/berkeleydb/downloads/index.html?ssSourceSiteId=ocomen
-http://www.di.unipi.it/~ghelli/didattica/bdldoc/B19306_01/appdev.102/b14259/xdb03usg.htm#CEGDFBAJ
-
-XMLTYPE
-XMLTABLE
-
-## DB
+#DB
 
 ###EXIBIR TODAS AS LOCATIONS DE CURSO
-
+```
   SELECT 
     locations.city, 
     locations.uf, 
@@ -912,20 +932,26 @@ XMLTABLE
     courses.university_id = universities.id
   ORDER BY
     universities.name ASC;
+```
 
 ###TAMANHO
-  
+
+```
   select pg_size_pretty(pg_database_size('lattesdata'));
   select pg_size_pretty(pg_table_size('curriculums'));
+```
 
 ###ANÁLISE DE UNIVERSITY
+```
 universities.name NOT SIMILAR TO '%(\-|\,|\/|\(|\))%' AND
  universities.name NOT ILIKE '%universi%'  
  universities.name NOT ILIKE '%estadu%' 
  universities.name NOT ILIKE '%federal%' 
  universities.name NOT ILIKE '%univ%'
+```
 
 ###PESSOAS QUE POSSUEM ORIENTAÇÃO
+```
 SELECT 
   people.name
 FROM 
@@ -1017,4 +1043,4 @@ WHERE
   courses.university_id = universities.id AND
   universities.location_id = locations.id
 ;
-
+```
