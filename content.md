@@ -233,6 +233,42 @@ https://www.ruby-toolbox.com/categories/geocoding___maps
 * https://github.com/garethr/graylogtail
 * https://scoutapp.com/plugin_urls
 
+###CSV
+* http://ruby-doc.org/stdlib-1.9.2/libdoc/csv/rdoc/CSV.html
+* https://github.com/tilo/smarter_csv
+* https://github.com/JEG2/faster_csv
+* http://www.sitepoint.com/guide-ruby-csv-library-part/
+* remove column: http://stackoverflow.com/questions/9184504/can-i-delete-columns-from-csv-using-ruby
+```
+#salve o arquivo no sublime com UTF-8
+require 'csv'
+csv = CSV.read('file.csv', {:headers => true, :col_sep => "\t"})
+csv.delete('wkt_geom')
+File.open("out.csv","w+") do |f|
+  csv.each do |row|
+    f.puts(row.to_csv(:col_sep => "\t"))
+  end
+end
+
+#squema do csv - http://www.convertcsv.com/csv-to-sql.htm
+CREATE TABLE munic(
+  #ID INTEGER NOT NULL PRIMARY KEY 
+, GEOCODIGO INTEGER
+, NOME VARCHAR(32)
+, UF VARCHAR(2)
+, ID_UF INTEGER
+, REGIAO VARCHAR(12)
+, MESOREGIAO VARCHAR(34)
+, MICROREGIA VARCHAR(36)
+, LATITUDE NUMERIC(8,4)
+, LONGITUDE NUMERIC(8,4)
+);
+```
+
+###SEQUEL
+* http://sequel.jeremyevans.net/index.html
+* http://sequel.jeremyevans.net/rdoc/files/doc/cheat_sheet_rdoc.html
+
 ###Tempfile & Mechanize
 * http://stackoverflow.com/questions/3316043/how-do-i-download-a-remote-image-from-another-site-to-a-file-column-in-ruby-on-r
 * agent.get('http://example.com/foo').save_as 'a_file_name'
