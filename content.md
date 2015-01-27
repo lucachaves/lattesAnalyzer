@@ -852,6 +852,11 @@ x.map{|y|
 
 ##[XML, DTD, XSL] -> [SQL, DB, CSV]
 
+### DTD to XSD
+http://www.w3.org/2000/04/schema_hack/
+http://bsp.mits.ch/xsd2dtd/
+http://www.altova.com/xmlspy.html
+
 ###HyperJAXB
 * https://github.com/highsource/hyperjaxb3/
 * http://confluence.highsource.org/display/HJ3/Documentation
