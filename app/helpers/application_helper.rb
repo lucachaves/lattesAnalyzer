@@ -828,11 +828,16 @@ module ApplicationHelper
 		lattesPool.shutdown
 	end
 
-	# TODO
+	################### 
+	# Location
+	################### 
+
 	def process_location_degree
+		# TODO
 	end
 
 	def normalize_brazilian_locations
+		# TODO
 	end
 
 	def normalize_country
@@ -927,6 +932,10 @@ module ApplicationHelper
 		# countFail
 	end
 
+	################### 
+	# GeoLocation
+	################### 
+
 	def process_location_university_geolocation(name)
 		# TODO search by unisity class or type
 	  g = Geocoder.search(name)
@@ -938,6 +947,10 @@ module ApplicationHelper
     	lon: g.first.data['lon']
   	}
 	end
+
+	################### 
+	# MQL
+	################### 
 
 	def process_location_university_freebase(name)
 		mql = mql(name)

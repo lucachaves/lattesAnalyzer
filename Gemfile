@@ -33,8 +33,8 @@ end
 
 gem 'freebase-api'
 gem 'log4r'
-gem 'rmagick'
-gem 'rtesseract'
+# gem 'rmagick'
+# gem 'rtesseract'
 gem 'zip'
 gem 'thread'
 gem 'mechanize'

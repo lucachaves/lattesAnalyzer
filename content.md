@@ -1084,4 +1084,31 @@ WHERE
   courses.university_id = universities.id AND
   universities.location_id = locations.id
 ;
+
+
+SELECT 
+  curriculums.degree
+FROM 
+  public.curriculums
+WHERE 
+  curriculums.degree NOT LIKE '%pos-doutorado%' AND
+  curriculums.degree NOT LIKE '%doutorado%' AND
+  curriculums.degree NOT LIKE '%mestrado%' AND
+  curriculums.degree NOT LIKE '%especializacao%' AND
+  curriculums.degree NOT LIKE '%aperfeicoamento%' AND
+  curriculums.degree NOT LIKE '%graduacao%' AND
+  curriculums.degree NOT LIKE '%curso-tecnico%' AND
+  curriculums.degree NOT LIKE '%ensino-medio%' AND
+  curriculums.degree NOT LIKE '%ensino-fundamental%' AND
+  curriculums.degree = '' AND
+  curriculums.degree IS NULL;
+
+
+SELECT 
+  curriculums.degree
+FROM 
+  public.curriculums
+WHERE 
+  curriculums.degree similar to 'residencia-medica \(\d+\)';
+
 ```
